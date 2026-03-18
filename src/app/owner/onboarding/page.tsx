@@ -251,8 +251,8 @@ export default function OwnerOnboardingPage() {
         .replace(/^-+|-+$/g, '');
       
       // Upload images if provided
-      let logoUrl = null;
-      let bannerImage = null;
+      let logoUrl: string | null = null;
+      let bannerImage: string | null = null;
       let imageUrls: string[] = [];
       
       if (logoFile) {

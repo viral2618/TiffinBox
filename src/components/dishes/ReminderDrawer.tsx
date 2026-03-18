@@ -107,7 +107,7 @@ export function ReminderDrawer({ isOpen, onOpenChange, dish, onReminderSet }: Re
       const isRecurring = selectedDays.length > 0
       
       // Calculate reminder time for today if serving now
-      let reminderTime = null
+      let reminderTime: Date | null = null;
       if (isServingNow && dish.timings && dish.timings.length > 0) {
         const now = new Date()
         const currentTiming = dish.timings[0]

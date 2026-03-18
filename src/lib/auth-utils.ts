@@ -23,7 +23,6 @@ export async function createUser(name: string, email: string, password: string, 
       name,
       email,
       password: hashedPassword,
-      fcmToken,
       emailVerified: false,
     },
   });

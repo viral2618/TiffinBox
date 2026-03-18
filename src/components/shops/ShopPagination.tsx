@@ -16,7 +16,7 @@ const ShopPagination: React.FC = () => {
   
   // Generate page numbers to display
   const getPageNumbers = () => {
-    const pageNumbers = [];
+    const pageNumbers: (number | string)[] = [];
     const maxPagesToShow = 5;
     
     if (pages <= maxPagesToShow) {

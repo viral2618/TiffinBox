@@ -78,7 +78,6 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         isOnboarded: false,
         emailVerified: false,
-        fcmToken,
       },
     });
     

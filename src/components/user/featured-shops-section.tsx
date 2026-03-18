@@ -123,7 +123,7 @@ export default function FeaturedShopsSection() {
           // Process shops to add distance and opening hours
           const processedShops = data.shops.map((shop: Shop) => {
             // Calculate distance if user location is available and shop has coordinates
-            let distance = undefined;
+            let distance: number | undefined = undefined;
             if (userPosition && shop.coordinates) {
               console.log(`Shop: ${shop.name}`);
               console.log(`Shop coordinates: lat=${shop.coordinates.lat}, lng=${shop.coordinates.lng}`);

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create test orders
-    const testOrders = [];
+    const testOrders: any[] = [];
     
     for (let i = 0; i < dishes.length; i++) {
       const dish = dishes[i];

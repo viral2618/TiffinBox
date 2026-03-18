@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Process shop tags if provided
-    let tagConnections = [];
+    let tagConnections: { tag: { connect: { id: string } } }[] = [];
     if (shopTags && shopTags.length > 0) {
       // Create or find tags and prepare connections
       for (const shopTag of shopTags) {

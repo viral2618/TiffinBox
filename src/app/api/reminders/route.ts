@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dish not found' }, { status: 404 });
     }
 
-    let calculatedReminderTime = null;
+    let calculatedReminderTime: Date | null = null;
     
     if (!isRecurring && reminderTime) {
       calculatedReminderTime = new Date(reminderTime);

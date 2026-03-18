@@ -144,7 +144,7 @@ export default function UserAuthTabs() {
       if (!response.ok) {
         // Handle validation errors with details
         if (data.details) {
-          const errorMessages = [];
+      const errorMessages: string[] = [];
           if (data.details.name) errorMessages.push(`Name: ${data.details.name.join(', ')}`);
           if (data.details.email) errorMessages.push(`Email: ${data.details.email.join(', ')}`);
           if (data.details.password) errorMessages.push(`Password: ${data.details.password.join(', ')}`);

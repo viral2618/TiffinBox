@@ -117,7 +117,7 @@ export default function FreshDelightsSection() {
           const discountPercentage = Math.floor(Math.random() * 41) + 10
           const originalPrice = Math.round(dish.price / (1 - discountPercentage / 100))
           
-          let distance = undefined
+          let distance: number | undefined = undefined
           if (userLocation) {
             const shopLat = dish.shop.coordinates?.lat || (userLocation.lat + (Math.random() - 0.5) * 0.1)
             const shopLng = dish.shop.coordinates?.lng || (userLocation.lng + (Math.random() - 0.5) * 0.1)

@@ -33,7 +33,7 @@ export default function MapPicker({ isOpen, onClose, onSelect, initialCoords }: 
       );
       const data = await response.json();
       const address = data.address || {};
-      const parts = [];
+      const parts: string[] = [];
       
       if (address.suburb || address.neighbourhood) {
         parts.push(address.suburb || address.neighbourhood);

@@ -268,7 +268,7 @@ export default function FilterSidebar({ categories, className }: FilterSidebarPr
               )
             })()}
             {currentParams.subcategoryId && (() => {
-              let selectedSub = null
+      let selectedSub: { id: string; name: string } | null | undefined = null;
               if (currentParams.categoryId) {
                 const selectedCat = categories.find(cat => cat.id === currentParams.categoryId)
                 selectedSub = selectedCat?.subcategories.find(sub => sub.id === currentParams.subcategoryId)

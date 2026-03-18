@@ -33,8 +33,8 @@ export default function ServerDishPagination({ pagination }: ServerDishPaginatio
   
   const getVisiblePages = () => {
     const delta = 2;
-    const range = [];
-    const rangeWithDots = [];
+    const range: number[] = [];
+    const rangeWithDots: (number | string)[] = [];
     
     for (let i = Math.max(2, page - delta); i <= Math.min(pages - 1, page + delta); i++) {
       range.push(i);
