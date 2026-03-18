@@ -32,35 +32,35 @@ export default function CategoriesSection() {
       id: "1",
       name: "Specials",
       slug: "specials",
-      imageUrl: "/images/croissant.png",
+      imageUrl: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&q=80",
       bgColor: "bg-green-200"
     },
     {
       id: "2",
       name: "Doughnuts",
       slug: "doughnuts",
-      imageUrl: "/images/donut.png",
+      imageUrl: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=200&q=80",
       bgColor: "bg-pink-200"
     },
     {
       id: "3",
       name: "Cookies",
       slug: "cookies",
-      imageUrl: "/images/cookie.png",
+      imageUrl: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=200&q=80",
       bgColor: "bg-yellow-200"
     },
     {
       id: "4",
       name: "Cakes",
       slug: "cakes",
-      imageUrl: "/images/cupcake.png",
+      imageUrl: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80",
       bgColor: "bg-cyan-200"
     },
     {
       id: "5",
       name: "Breads",
       slug: "breads",
-      imageUrl: "/images/bread.png",
+      imageUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80",
       bgColor: "bg-orange-200"
     }
   ]

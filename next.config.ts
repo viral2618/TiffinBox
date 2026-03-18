@@ -134,13 +134,6 @@ import withPWA from "@ducanh2912/next-pwa";
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
-    domains: [
-      'images.pexels.com',
-      'via.placeholder.com',
-      'placehold.co',
-      'picsum.photos',
-      'pub-261021c7b68740ffba855a7e8a6f3c1e.r2.dev'
-    ],
     remotePatterns: [
       {
         protocol: 'https',
