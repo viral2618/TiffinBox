@@ -1,0 +1,551 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String             @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String             @unique
+  password        String
+  role            String             @default("user")
+  phone           String?
+  location        GeoLocation?
+  fcmToken        String?
+  emailVerified   Boolean            @default(false)
+  favoritesShops  UserFavoriteShop[]
+  favoritesDishes UserFavoriteDish[]
+  reviews         Review[]
+  shopReviews     ShopReview[]
+  feedbacks       Feedback[]
+  emailVerificationOtp String?
+  forgotPasswordToken   String?
+  changePasswordToken   String?
+  notificationPreference UserNotificationPreference?
+  notifications   Notification[]
+  reminders       Reminder[]
+  deviceTokens    DeviceToken[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model Owner {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  phone       String?
+  password    String
+  role        String   @default("owner")
+  fcmToken    String?
+  isOnboarded Boolean  @default(false)
+  emailVerified Boolean @default(false)
+  shops       Shop[]
+  emailVerificationOtp String?
+  forgotPasswordToken   String?
+  changePasswordToken   String?
+  notificationPreference OwnerNotificationPreference?
+  notifications Notification[]
+  deviceTokens  DeviceToken[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Shop {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  slug         String             @unique
+  description  String?
+  address      String
+  coordinates  GeoLocation?
+  bannerImage  String?
+  logoUrl      String?
+  imageUrls    String[]
+  contactPhone String?
+  contactPhone2 String?
+  contactPhone3 String?
+  whatsapp     String?
+  establishedYear Int?
+  openingHours OpeningHours?
+  isOpen       Boolean            @default(false)
+  schedule     String?            // JSON string for flexible schedule
+  owner        Owner              @relation(fields: [ownerId], references: [id])
+  ownerId      String             @db.ObjectId
+  dishes       Dish[]
+  shopTags     ShopTag[]
+  favorites    UserFavoriteShop[]
+  shopReviews  ShopReview[]
+  createdAt    DateTime           @default(now())
+
+  @@index([name])
+  @@index([description])
+}
+
+model Dish {
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  slug           String             @unique
+  description    String?
+  imageUrls      String[]
+  price          Float
+  originalPrice  Float?
+  discountPercentage Float?
+  currency       String             @default("INR")
+  prepTimeMinutes Int?              // Preparation time template
+  isVeg          Boolean            @default(true)
+  shop           Shop               @relation(fields: [shopId], references: [id])
+  shopId         String             @db.ObjectId
+  category       Category           @relation(fields: [categoryId], references: [id])
+  categoryId     String             @db.ObjectId
+  subcategory    Subcategory?       @relation(fields: [subcategoryId], references: [id])
+  subcategoryId  String?            @db.ObjectId
+  dishTags       DishTag[]
+  favorites      UserFavoriteDish[]
+  timings        DishTiming[]
+  recipeTemplate RecipeTemplate?
+  orderItems     OrderItem[]
+  reviews        Review[]
+  createdAt      DateTime           @default(now())
+
+  Reminder Reminder[]
+
+  @@index([name])
+  @@index([description])
+  @@index([categoryId])
+  @@index([shopId])
+}
+
+model Category {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String        @unique
+  description   String?
+  imageUrl      String?
+  subcategories Subcategory[]
+  dishes        Dish[]
+
+  @@index([name])
+}
+
+model Subcategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String   @db.ObjectId
+  dishes      Dish[]
+}
+
+model Tag {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  dishTags  DishTag[]
+  shopTags  ShopTag[]
+}
+
+model DishTiming {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dish        Dish     @relation(fields: [dishId], references: [id])
+  dishId      String   @db.ObjectId
+  createdAt   TimeSlot
+  preparedAt  TimeSlot
+  servedFrom  TimeSlot
+  servedUntil TimeSlot
+}
+
+type GeoLocation {
+  lat Float
+  lng Float
+}
+
+type TimeSlot {
+  hour   Int
+  minute Int
+}
+
+type OpeningHours {
+  monday    DayHours?
+  tuesday   DayHours?
+  wednesday DayHours?
+  thursday  DayHours?
+  friday    DayHours?
+  saturday  DayHours?
+  sunday    DayHours?
+}
+
+type DayHours {
+  open  TimeSlot
+  close TimeSlot
+  isClosed Boolean @default(false)
+}
+
+model DishTag {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  dish   Dish   @relation(fields: [dishId], references: [id])
+  dishId String @db.ObjectId
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String @db.ObjectId
+
+  @@unique([dishId, tagId])
+}
+
+model ShopTag {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String @db.ObjectId
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String @db.ObjectId
+
+  @@unique([shopId, tagId])
+}
+
+model UserFavoriteShop {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String @db.ObjectId
+
+  @@unique([userId, shopId])
+}
+
+model UserFavoriteDish {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+  dish   Dish   @relation(fields: [dishId], references: [id])
+  dishId String @db.ObjectId
+
+  @@unique([userId, dishId])
+}
+
+model UserNotificationPreference {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  general           Boolean @default(true)
+  emailAlerts       Boolean @default(false)
+  notificationAlert Boolean @default(false)
+  user              User    @relation(fields: [userId], references: [id])
+  userId            String  @unique @db.ObjectId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OwnerNotificationPreference {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  general           Boolean @default(true)
+  emailAlerts       Boolean @default(false)
+  notificationAlert Boolean @default(false)
+  owner             Owner   @relation(fields: [ownerId], references: [id])
+  ownerId           String  @unique @db.ObjectId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  message     String
+  type        String   // e.g., "reminder", "login", "system"
+  isRead      Boolean  @default(false)
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?  @db.ObjectId
+  owner       Owner?   @relation(fields: [ownerId], references: [id])
+  ownerId     String?  @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, isRead])
+  @@index([ownerId, isRead])
+  @@index([createdAt])
+}
+
+model Reminder {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dish        Dish     @relation(fields: [dishId], references: [id])
+  dishId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.ObjectId
+  reminderTime    DateTime?
+  isRecurring     Boolean  @default(false)
+  recurringDays   String[]
+  remindBefore    Int      @default(15) // in minutes
+  message         String?
+  isActive        Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RecipeTemplate {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  dish        Dish       @relation(fields: [dishId], references: [id])
+  dishId      String     @unique @db.ObjectId
+  prepTime    Int        // minutes
+  bakeTime    Int        // minutes
+  coolTime    Int        // minutes
+  shelfLife   Int        // minutes
+  batchSize   Int        // items per batch
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  orderItems  OrderItem[]
+}
+
+model DishPreparationSlot {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  dishId          String   @db.ObjectId
+  slotId          String   // e.g., "2026-02-24-01"
+  startedAt       DateTime
+  prepTimeMinutes Int
+  servingStartsAt DateTime
+  endedAt         DateTime?
+  status          PreparationStatus @default(PREPARING)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([dishId, status])
+  @@index([servingStartsAt])
+}
+
+enum PreparationStatus {
+  PREPARING
+  SERVING
+  SOLD_OUT
+}
+
+model OrderItem {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  dish            Dish           @relation(fields: [dishId], references: [id])
+  dishId          String         @db.ObjectId
+  recipeTemplate  RecipeTemplate @relation(fields: [recipeTemplateId], references: [id])
+  recipeTemplateId String        @db.ObjectId
+  quantity        Int
+  batchesRequired Int            // calculated field
+  status          OrderStatus    @default(QUEUED)
+  priority        OrderPriority  @default(NORMAL)
+  orderedAt       DateTime       @default(now())
+  requestedBy     DateTime       // when customer wants it
+  startTime       DateTime?      // when owner starts prep
+  prepStartTime   DateTime?
+  bakeStartTime   DateTime?
+  coolStartTime   DateTime?
+  readyTime       DateTime?
+  servedTime      DateTime?
+  delays          DelayLog[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model DelayLog {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  orderItemId String    @db.ObjectId
+  reason      String
+  minutes     Int
+  addedAt     DateTime  @default(now())
+  addedBy     String    // owner id or system
+}
+
+enum OrderStatus {
+  QUEUED
+  PREP
+  BAKING
+  COOLING
+  READY
+  SERVED
+  CANCELLED
+}
+
+enum OrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+
+model About {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String   // Rich text content
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+
+model PrivacyPolicy {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  content     String   // Rich text content (HTML/Markdown)
+  version     String   // Version number (e.g., "1.0", "2.1")
+  isActive    Boolean  @default(false)
+  effectiveDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model TermsConditions {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  content     String   // Rich text content (HTML/Markdown)
+  version     String   // Version number (e.g., "1.0", "2.1")
+  isActive    Boolean  @default(false)
+  effectiveDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model FaqCategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  order       Int      @default(0) // Display order
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  faqs        Faq[]
+}
+
+
+model Faq {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  question    String
+  answer      String      // Rich text content (HTML/Markdown)
+  categoryId  String      @db.ObjectId
+  order       Int         @default(0) // Display order within category
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  category    FaqCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+
+
+model Card {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  buttonText  String      @map("button_text")
+  buttonUrl   String      @map("button_url")
+  visible     Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  images      CardImage[]
+  
+  @@index([visible, createdAt(sort: Desc)])
+}
+
+
+model CardImage {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  resolution   ImageResolution
+  url          String
+  aspectRatio  String?           @map("aspect_ratio")
+  type         ImageType
+  cardId       String            @db.ObjectId
+  
+  card         Card              @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  @@index([resolution, type])
+}
+
+enum ImageResolution {
+  mobile
+  tablet
+  desktop
+}
+
+enum ImageType {
+  popup
+  bottom_nav @map("bottom-nav")
+  card
+}
+
+type DelayOption {
+  label   String
+  minutes Int?
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int      // 1-5 stars
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  dish      Dish     @relation(fields: [dishId], references: [id])
+  dishId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, dishId])
+  @@index([dishId, createdAt(sort: Desc)])
+}
+
+model ShopReview {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int      // 1-5 stars
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  shopId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, shopId])
+  @@index([shopId, createdAt(sort: Desc)])
+}
+
+model Feedback {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName          String
+  email             String
+  contactNumber     String?
+  preferredBakery   String?
+  feedbackCategory  String   // Home, Shops, Dishes, Categories
+  feedback          String
+  experienceRating  Int      // 1-5 stars
+  allowFollowUp     Boolean  @default(false)
+  user              User?    @relation(fields: [userId], references: [id])
+  userId            String?  @db.ObjectId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([feedbackCategory, createdAt(sort: Desc)])
+  @@index([experienceRating])
+}
+
+model DeviceToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  token      String   @unique
+  userId     String?  @db.ObjectId
+  ownerId    String?  @db.ObjectId
+  user       User?    @relation(fields: [userId], references: [id])
+  owner      Owner?   @relation(fields: [ownerId], references: [id])
+  deviceInfo String?
+  lastUsed   DateTime @default(now())
+  createdAt  DateTime @default(now())
+  
+  @@index([userId])
+  @@index([ownerId])
+}
+
+model ExchangeRate {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  base      String   @default("INR")
+  rates     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

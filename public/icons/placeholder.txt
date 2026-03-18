@@ -1,0 +1,13 @@
+This is a placeholder file. You should replace these with actual icons for your PWA.
+
+Required icon sizes:
+- 72x72
+- 96x96
+- 128x128
+- 144x144
+- 152x152
+- 192x192
+- 384x384
+- 512x512
+
+You can use tools like https://realfavicongenerator.net/ to generate all the required icons from a single source image.

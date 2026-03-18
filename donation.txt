@@ -1,0 +1,910 @@
+# Donation GIF/Video Implementation Guide
+
+This document provides a complete implementation guide for adding donation GIF/video functionality to a Next.js project with dynamic card management system.
+
+## Overview
+
+The donation system displays promotional content (images, GIFs, or videos) that can be dynamically managed through an API. It supports multiple device resolutions and display types with responsive design.
+
+## Features
+
+- **Multi-format Support**: Images, GIFs, and MP4 videos
+- **Responsive Design**: Mobile, tablet, and desktop optimized
+- **Multiple Display Types**: Hero banners, popup cards, and bottom navigation
+- **Dynamic Content Management**: API-driven card system
+- **Fallback Content**: Default content when no cards are available
+- **Interactive Controls**: Expand, close, and click-to-donate functionality
+
+## Database Schema
+
+### Card Model
+```prisma
+model Card {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String   // Donation URL to redirect to
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images CardImage[]
+
+  @@index([visible, createdAt(sort: Desc)])
+}
+
+model CardImage {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  resolution  ImageResolution // mobile, tablet, desktop
+  url         String          // Image/GIF/Video URL
+  aspectRatio String?         // e.g., "16:9", "4:5"
+  type        ImageType       // popup, bottom_nav, card
+  cardId      String          @db.ObjectId
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([resolution, type])
+}
+
+enum ImageResolution {
+  mobile
+  tablet
+  desktop
+}
+
+enum ImageType {
+  popup
+  bottom_nav @map("bottom-nav")
+  card
+}
+```
+
+## API Implementation
+
+### 1. Cards API Route (`/api/cards/route.ts`)
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { uploadToCloudflareImages } from "@/lib/cloudflare-r2";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const resolution = searchParams.get('resolution') as 'mobile' | 'tablet' | 'desktop';
+    const type = searchParams.get('type') as 'popup' | 'bottom_nav' | 'card';
+
+    const cards = await prisma.card.findMany({
+      where: { visible: true },
+      include: {
+        images: {
+          where: {
+            ...(resolution && { resolution }),
+            ...(type && { type })
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return NextResponse.json({ 
+      status: 200, 
+      message: "Cards fetched successfully", 
+      data: cards 
+    });
+  } catch (error) {
+    console.error('Error fetching cards:', error);
+    return NextResponse.json({ 
+      status: 500, 
+      message: "Failed to fetch cards" 
+    }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const url = formData.get("url") as string;
+    const visible = formData.get("visible") === "true";
+
+    const images = [];
+    const resolutions = ['mobile', 'tablet', 'desktop'];
+
+    for (const res of resolutions) {
+      const files = formData.getAll(`${res}Image`) as File[];
+      const type = formData.get(`${res}Type`) as string;
+
+      if (files.length && type) {
+        for (const file of files) {
+          const uploadedUrl = await uploadToCloudflareImages(file);
+          
+          images.push({
+            resolution: res as "mobile" | "tablet" | "desktop",
+            url: uploadedUrl,
+            aspectRatio: "16:9",
+            type: type.replace('-', '_') as "popup" | "bottom_nav" | "card"
+          });
+        }
+      }
+    }
+
+    const card = await prisma.card.create({
+      data: {
+        url,
+        visible,
+        images: {
+          create: images
+        }
+      },
+      include: {
+        images: true
+      }
+    });
+
+    return NextResponse.json({ 
+      status: 201, 
+      message: "Card created successfully", 
+      data: card 
+    });
+  } catch (error) {
+    return NextResponse.json({ 
+      status: 500, 
+      message: "Failed to create card" 
+    }, { status: 500 });
+  }
+}
+```
+
+### 2. Cards by Type API Route (`/api/cards/by-type/[resolution]/[type]/route.ts`)
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ resolution: string; type: string }> }
+) {
+  try {
+    const { resolution, type } = await params;
+
+    const validResolutions = ['mobile', 'tablet', 'desktop'];
+    const validTypes = ['popup', 'bottom_nav', 'card'];
+
+    if (!validResolutions.includes(resolution) || !validTypes.includes(type)) {
+      return NextResponse.json(
+        { status: 400, message: 'Invalid resolution or type' },
+        { status: 400 }
+      );
+    }
+
+    const cards = await prisma.card.findMany({
+      where: { visible: true },
+      include: {
+        images: {
+          where: {
+            resolution: resolution as 'mobile' | 'tablet' | 'desktop',
+            type: type as 'popup' | 'bottom_nav' | 'card'
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const filteredCards = cards.filter(card => card.images.length > 0);
+
+    return NextResponse.json({
+      status: 200,
+      message: 'Cards fetched successfully',
+      data: filteredCards
+    });
+  } catch (error) {
+    console.error('Error fetching cards:', error);
+    return NextResponse.json(
+      { status: 500, message: 'Failed to fetch cards' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## Component Implementation
+
+### 1. Hero Banner Component (`/components/donate/hero-banner.tsx`)
+
+```typescript
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+
+interface CardData {
+  id: string;
+  url: string;
+  images: {
+    id: string;
+    resolution: "mobile" | "tablet" | "desktop";
+    url: string;
+    aspectRatio?: string;
+    type: "popup" | "bottom_nav" | "card";
+  }[];
+}
+
+export function HeroBanner() {
+  const [card, setCard] = useState<CardData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCard = async () => {
+      setLoading(true);
+      try {
+        const width = window.innerWidth;
+        let endpoint;
+        if (width < 768) {
+          endpoint = "/api/cards/by-type/mobile/card";
+        } else if (width < 1024) {
+          endpoint = "/api/cards/by-type/tablet/card";
+        } else {
+          endpoint = "/api/cards/by-type/desktop/card";
+        }
+        const response = await fetch(endpoint, { cache: "no-store" });
+        if (response.ok) {
+          const data = await response.json();
+          if (isMounted) setCard((data.data || [])[0] || null);
+        }
+      } catch (e) {
+        // fail silently
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchCard();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (hidden || (!loading && !card)) return null;
+
+  const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 1024;
+  const targetResolution = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+  const image = card?.images.find((img) => (img.resolution === targetResolution) && (img.type === "card"))
+    || card?.images.find((img) => img.resolution === targetResolution)
+    || card?.images[0];
+
+  const handleClick = () => {
+    if (!card) return;
+    window.open(card.url, "_blank", "noopener,noreferrer");
+  };
+
+  const aspectRatio = isMobile ? 320/50 : isTablet ? 468/60 : 728/90;
+  const maxWidth = isMobile ? "320px" : isTablet ? "468px" : "728px";
+
+  return (
+    <div className="w-full">
+      <div className="mx-auto w-full px-2 md:px-0" style={{ maxWidth }}>
+        <AspectRatio ratio={aspectRatio}>
+          <div className="relative w-full h-full rounded-md overflow-hidden bg-black">
+            {loading ? (
+              <div className="w-full h-full animate-pulse bg-muted" />
+            ) : (
+              <Image
+                src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=400&fit=crop&crop=center"
+                alt="Mother's Day Special - Healthcare for Mothers"
+                fill
+                priority
+                sizes={isMobile ? "320px" : isTablet ? "468px" : "728px"}
+                className="object-cover cursor-pointer"
+                onClick={handleClick}
+              />
+            )}
+
+            <Button
+              onClick={(e) => { e.stopPropagation(); setHidden(true); }}
+              variant="ghost"
+              size="icon"
+              className="absolute top-1.5 right-1.5 z-10 bg-black/40 hover:bg-black/60 text-white rounded-full h-7 w-7"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </AspectRatio>
+      </div>
+    </div>
+  );
+}
+```
+
+### 2. Donate Card Component (`/components/donate/donate-card.tsx`)
+
+```typescript
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+import Image from 'next/image';
+import { useMediaQuery } from '@/hooks/use-media-query';
+
+interface CardData {
+  id: string;
+  url: string;
+  mediaType?: 'image' | 'video' | 'gif';
+  mediaUrl?: string;
+  images: {
+    id: string;
+    resolution: 'mobile' | 'tablet' | 'desktop';
+    url: string;
+    aspectRatio?: string;
+    type: 'popup' | 'bottom_nav' | 'card';
+  }[];
+}
+
+interface DonateCardProps {
+  card: CardData;
+  onClose?: () => void;
+  fullHeight?: boolean;
+}
+
+export function DonateCard({ card, onClose, fullHeight }: DonateCardProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const handleDonate = () => {
+    window.open(card.url, '_blank', 'noopener,noreferrer');
+  };
+
+  const primaryImage = card.images[0];
+  const mediaUrl = card.mediaUrl || '/donation2.mp4';
+  const mediaType = card.mediaType || 'video';
+  
+  const getMediaTypeFromUrl = (url: string) => {
+    const ext = url.split('.').pop()?.toLowerCase();
+    if (ext === 'mp4' || ext === 'webm' || ext === 'ogg' || ext === 'avi' || ext === 'mov' || ext === 'wmv' || ext === 'flv' || ext === 'mkv') return 'video';
+    if (ext === 'gif') return 'gif';
+    return 'image';
+  };
+  
+  const finalMediaType = mediaType || getMediaTypeFromUrl(mediaUrl);
+
+  const getHeightFromAspectRatio = (aspectRatio?: string) => {
+    if (!aspectRatio) {
+      return isMobile ? 'aspect-[4/5]' : 'h-48 md:h-64';
+    }
+    const [width, height] = aspectRatio.split(':').map(Number);
+    const ratio = height / width;
+    return ratio > 0.75 ? 'h-64 md:h-80' : 'h-48 md:h-64';
+  };
+
+  let heightClass: string;
+  if (fullHeight) {
+    heightClass = 'h-full';
+  } else {
+    heightClass = isMobile ? 'aspect-[4/5]' : getHeightFromAspectRatio(primaryImage?.aspectRatio);
+  }
+
+  return (
+    <div
+      className={`relative w-full ${heightClass} cursor-pointer overflow-hidden mb-0 rounded-none`}
+      onClick={handleDonate}
+    >
+      {finalMediaType === 'video' ? (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls={false}
+          className="w-full h-full object-cover"
+        >
+          <source src={mediaUrl} type={`video/${mediaUrl.split('.').pop()?.toLowerCase() || 'mp4'}`} />
+          <source src={mediaUrl} type="video/mp4" />
+          <source src={mediaUrl} type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+      ) : (
+        <Image
+          src={mediaUrl}
+          alt="Donation media"
+          fill
+          className="w-full h-full object-cover"
+          unoptimized={finalMediaType === 'gif'}
+        />
+      )}
+
+      {onClose && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          variant="ghost"
+          size="icon"
+          className="absolute top-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white rounded-full h-8 w-8"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
+```
+
+### 3. Donate Button Component (`/components/donate/donate-button.tsx`)
+
+```typescript
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { DonateDrawer, DonateDrawerContent, DonateDrawerTrigger, DonateDrawerTitle } from '@/components/ui/donate-drawer';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Heart, Expand, X } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { DonateCard } from './donate-card';
+
+interface CardData {
+  id: string;
+  url: string;
+  images: {
+    id: string;
+    resolution: 'mobile' | 'tablet' | 'desktop';
+    url: string;
+    aspectRatio?: string;
+    type: 'popup' | 'bottom_nav' | 'card';
+  }[];
+}
+
+interface DonateButtonProps {
+  variant?: 'mobile' | 'desktop';
+  className?: string;
+}
+
+export function DonateButton({ variant = 'desktop', className }: DonateButtonProps) {
+  const [cards, setCards] = useState<CardData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const fetchCards = async () => {
+    setLoading(true);
+    try {
+      const resolution = isMobile ? 'mobile' : 'desktop';
+      const type = isMobile ? 'bottom_nav' : 'popup';
+
+      const response = await fetch(`/api/cards/by-type/${resolution}/${type}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCards(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch cards:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClick = () => {
+    if (cards.length === 0) {
+      fetchCards();
+    }
+    setOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (open) {
+      const t = setTimeout(() => setAnimateIn(true), 20);
+      return () => clearTimeout(t);
+    } else {
+      setAnimateIn(false);
+    }
+  }, [open]);
+
+  if (variant === 'mobile') {
+    return (
+      <DonateDrawer open={open} onOpenChange={setOpen}>
+        <DonateDrawerTrigger asChild>
+          <Button
+            onClick={() => {
+              if (cards.length === 0) {
+                fetchCards();
+              }
+              setOpen(true);
+            }}
+            size="sm"
+            className={`bg-gradient-to-r from-primary to-primary text-white shadow-lg ${className}`}
+          >
+            <Heart className="h-4 w-4 mr-1" />
+          </Button>
+        </DonateDrawerTrigger>
+        <DonateDrawerContent className="p-0 bg-black">
+          <VisuallyHidden asChild>
+            <DonateDrawerTitle>Donation Cards</DonateDrawerTitle>
+          </VisuallyHidden>
+          <div className="max-h-[85vh] overflow-y-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {cards.map((card) => (
+                  <DonateCard key={card.id} card={card} onClose={() => setOpen(false)} fullHeight />
+                ))}
+                {cards.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No donation cards available at the moment.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </DonateDrawerContent>
+      </DonateDrawer>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        onClick={handleClick}
+        size="sm"
+        className={`fixed bottom-6 right-6 z-50 bg-primary text-white shadow-lg rounded-full h-12 w-12 p-0 ${className}`}
+      >
+        <Heart className="h-5 w-5" />
+      </Button>
+
+      {open && (
+        <div className={`fixed z-[60] transition-all duration-300 ease-out ${
+          expanded 
+            ? 'right-6 bottom-6' 
+            : 'right-6 bottom-6'
+        }`}>
+          <div className={`overflow-hidden shadow-2xl transform transition-all duration-300 ease-out ${
+            expanded 
+              ? 'w-[500px] h-[600px] max-w-[90vw] rounded-lg' 
+              : `w-[360px] max-w-[90vw] rounded-lg ${animateIn ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-3'}`
+          }`}>
+            {!expanded && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded(true);
+                }}
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 left-2 z-20 bg-black/40 hover:bg-black/60 text-white rounded-full h-8 w-8"
+              >
+                <Expand className="h-4 w-4" />
+              </Button>
+            )}
+            
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (expanded) {
+                  setExpanded(false);
+                } else {
+                  setOpen(false);
+                }
+              }}
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-30 bg-black/40 hover:bg-black/60 text-white rounded-full h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : cards[0] ? (
+              <DonateCard card={cards[0]} onClose={undefined} fullHeight={expanded} />
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No donation cards available at the moment.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+### 4. Donate Drawer UI Component (`/components/ui/donate-drawer.tsx`)
+
+```typescript
+"use client"
+
+import * as React from "react"
+import { Drawer as DrawerPrimitive } from "vaul"
+import { cn } from "@/lib/utils"
+
+function DonateDrawer({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+  return <DrawerPrimitive.Root data-slot="donate-drawer" {...props} />
+}
+
+function DonateDrawerTrigger({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
+  return <DrawerPrimitive.Trigger data-slot="donate-drawer-trigger" {...props} />
+}
+
+function DonateDrawerPortal({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
+  return <DrawerPrimitive.Portal data-slot="donate-drawer-portal" {...props} />
+}
+
+function DonateDrawerClose({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+  return <DrawerPrimitive.Close data-slot="donate-drawer-close" {...props} />
+}
+
+function DonateDrawerOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
+  return (
+    <DrawerPrimitive.Overlay
+      data-slot="donate-drawer-overlay"
+      className={cn(
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function DonateDrawerContent({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+  return (
+    <DonateDrawerPortal data-slot="donate-drawer-portal">
+      <DonateDrawerOverlay />
+      <DrawerPrimitive.Content
+        data-slot="donate-drawer-content"
+        className={cn(
+          "group/donate-drawer-content fixed z-50 flex h-auto flex-col bg-black p-0",
+          "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:max-h-[85vh] data-[vaul-drawer-direction=top]:rounded-none data-[vaul-drawer-direction=top]:border-0",
+          "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:max-h-[85vh] data-[vaul-drawer-direction=bottom]:rounded-none data-[vaul-drawer-direction=bottom]:border-0",
+          "data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-screen data-[vaul-drawer-direction=right]:border-0",
+          "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-screen data-[vaul-drawer-direction=left]:border-0",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </DrawerPrimitive.Content>
+    </DonateDrawerPortal>
+  )
+}
+
+function DonateDrawerTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
+  return (
+    <DrawerPrimitive.Title
+      data-slot="donate-drawer-title"
+      className={cn("text-foreground font-semibold", className)}
+      {...props}
+    />
+  )
+}
+
+function DonateDrawerDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Description>) {
+  return (
+    <DrawerPrimitive.Description
+      data-slot="donate-drawer-description"
+      className={cn("text-muted-foreground text-sm", className)}
+      {...props}
+    />
+  )
+}
+
+export {
+  DonateDrawer,
+  DonateDrawerPortal,
+  DonateDrawerOverlay,
+  DonateDrawerTrigger,
+  DonateDrawerClose,
+  DonateDrawerContent,
+  DonateDrawerTitle,
+  DonateDrawerDescription,
+}
+```
+
+## Usage in Home Page
+
+### Integration in Home Content (`/components/patient/home-content.tsx`)
+
+```typescript
+import { HeroBanner } from '@/components/donate/hero-banner';
+
+export function HomeContent({ initialCamps, initialCategories, initialPagination }: HomeContentProps) {
+  // ... other code
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header Section */}
+      <section className="relative py-8 px-4 bg-gradient-to-r from-primary/8 via-card to-secondary/8 border-b border-border">
+        {/* ... header content */}
+        
+        {/* Card Banner Integration */}
+        <div className="container mx-auto mt-8">
+          <HeroBanner />
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-4">
+        {/* ... main content */}
+      </section>
+    </div>
+  );
+}
+```
+
+## Required Dependencies
+
+### Package.json Dependencies
+```json
+{
+  "dependencies": {
+    "@radix-ui/react-visually-hidden": "^1.0.3",
+    "vaul": "^0.9.0",
+    "lucide-react": "^0.263.1"
+  }
+}
+```
+
+### Required Hooks
+
+#### useMediaQuery Hook (`/hooks/use-media-query.ts`)
+```typescript
+import { useState, useEffect } from 'react';
+
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    window.addEventListener("resize", listener);
+    return () => window.removeEventListener("resize", listener);
+  }, [matches, query]);
+
+  return matches;
+}
+```
+
+## File Structure
+
+```
+src/
+├── components/
+│   ├── donate/
+│   │   ├── hero-banner.tsx
+│   │   ├── donate-card.tsx
+│   │   └── donate-button.tsx
+│   └── ui/
+│       └── donate-drawer.tsx
+├── app/
+│   └── api/
+│       └── cards/
+│           ├── route.ts
+│           └── by-type/
+│               └── [resolution]/
+│                   └── [type]/
+│                       └── route.ts
+├── hooks/
+│   └── use-media-query.ts
+└── lib/
+    ├── prisma.ts
+    └── cloudflare-r2.ts
+```
+
+## Static Assets
+
+Place your default media files in the `public/` directory:
+- `/public/donation2.mp4` - Default donation video
+- `/public/donation-video.mp4` - Alternative donation video
+
+## Environment Variables
+
+```env
+# Database
+DATABASE_URL="your_mongodb_connection_string"
+
+# Cloudflare R2 (for image uploads)
+CLOUDFLARE_R2_ACCOUNT_ID="your_account_id"
+CLOUDFLARE_R2_ACCESS_KEY_ID="your_access_key"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY="your_secret_key"
+CLOUDFLARE_R2_BUCKET_NAME="your_bucket_name"
+```
+
+## Key Features Explained
+
+### 1. **Responsive Design**
+- Automatically detects screen size and loads appropriate content
+- Different aspect ratios for mobile, tablet, and desktop
+- Optimized image sizes for each device type
+
+### 2. **Multi-format Support**
+- Supports images, GIFs, and MP4 videos
+- Automatic format detection based on file extension
+- Fallback content when no cards are available
+
+### 3. **Dynamic Content Management**
+- Cards can be created, updated, and toggled via API
+- Support for multiple images per card with different resolutions
+- Visibility control for each card
+
+### 4. **Interactive Features**
+- Click-to-donate functionality
+- Expand/collapse for desktop popup
+- Close button with smooth animations
+- Mobile drawer interface
+
+### 5. **Performance Optimizations**
+- Lazy loading of cards (fetched only when needed)
+- Image optimization with Next.js Image component
+- Efficient database queries with proper indexing
+
+## Customization Options
+
+### 1. **Styling**
+- Modify CSS classes in components for different themes
+- Adjust aspect ratios for different layouts
+- Customize animation durations and effects
+
+### 2. **Content Types**
+- Add support for additional media formats
+- Implement different card layouts
+- Add metadata fields for better content management
+
+### 3. **API Extensions**
+- Add authentication for card management
+- Implement analytics tracking
+- Add scheduling for card visibility
+
+## Testing
+
+### 1. **Component Testing**
+```typescript
+// Test different screen sizes
+// Test media format detection
+// Test API error handling
+// Test responsive behavior
+```
+
+### 2. **API Testing**
+```typescript
+// Test card creation with different formats
+// Test filtering by resolution and type
+// Test error scenarios
+// Test database operations
+```
+
+This implementation provides a complete, production-ready donation GIF/video system that can be easily integrated into any Next.js project with minimal modifications.

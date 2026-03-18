@@ -1,0 +1,1 @@
+// Bundle analyzer configuration\nconst withBundleAnalyzer = require('@next/bundle-analyzer')({\n  enabled: process.env.ANALYZE === 'true',\n  openAnalyzer: true,\n})\n\nmodule.exports = withBundleAnalyzer\n\n// Usage: ANALYZE=true npm run build
