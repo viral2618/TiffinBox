@@ -31,34 +31,34 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: "WhenFresh",
-    template: "%s | WhenFresh"
+    default: "TiffinLane",
+    template: "%s | TiffinLane"
   },
-  description: "Find fresh food near you",
-  keywords: ["fresh food", "local food", "restaurants", "delivery", "food finder"],
-  authors: [{ name: "WhenFresh Team" }],
-  creator: "WhenFresh",
-  publisher: "WhenFresh",
+  description: "Home-cooked meals by local cooks — made for students missing mom's food",
+  keywords: ["home food", "tiffin", "homemade meals", "student food", "local cooks", "ghar ka khana"],
+  authors: [{ name: "TiffinLane Team" }],
+  creator: "TiffinLane",
+  publisher: "TiffinLane",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "WhenFresh",
+    title: "TiffinLane",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "WhenFresh",
-    title: "WhenFresh",
-    description: "Find fresh food near you",
+    siteName: "TiffinLane",
+    title: "TiffinLane",
+    description: "Home-cooked meals by local cooks — made for students missing mom's food",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "WhenFresh",
-    description: "Find fresh food near you",
+    title: "TiffinLane",
+    description: "Home-cooked meals by local cooks — made for students missing mom's food",
   },
   robots: {
     index: true,
@@ -97,18 +97,18 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="WhenFresh" />
+        <meta name="apple-mobile-web-app-title" content="TiffinLane" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#fc7c7c" />
+        <meta name="msapplication-TileColor" content="#0d9488" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#fc7c7c" />
+        <meta name="theme-color" content="#0d9488" />
         
         {/* Performance hints */}
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
       </head>
       <body
         className={`${geistSans.variable} antialiased min-h-screen`}
-        style={{ backgroundColor: '#fef7ed', color: '#451a03' }}
+        style={{ backgroundColor: '#f0fdfa', color: '#134e4a' }}
       >
         <PerformanceTracker routeName="root">
           <Providers>
@@ -117,7 +117,7 @@ export default function RootLayout({
               <FCMInitializer />
               <FirebaseMessagingInit />
               <BetaBanner />
-              <main className="min-h-screen pb-32" style={{ backgroundColor: '#fef7ed', color: '#451a03', paddingTop: '0' }}>
+              <main className="min-h-screen pb-32" style={{ backgroundColor: '#f0fdfa', color: '#134e4a', paddingTop: '0' }}>
                 {children}
               </main>
               <Footer />

@@ -11,7 +11,7 @@ export default function CallToActionSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
-    <section ref={ref} className="py-24 bg-gradient-to-br from-primary/5 via-background to-muted/20">
+    <section ref={ref} className="py-24" style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #f0fdfa 100%)' }}>
       <div className="container mx-auto px-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -36,7 +36,7 @@ export default function CallToActionSection() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-4xl md:text-5xl font-semibold text-foreground mb-6"
           >
-            Ready to Order?
+            Craving Home Food?
           </motion.h2>
 
           {/* Description */}
@@ -46,7 +46,7 @@ export default function CallToActionSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
           >
-            Join thousands of food lovers who trust us for fresh, delicious treats delivered right to their doorstep.
+            Join thousands of students who trust TiffinLane for fresh, homemade meals that taste just like mom made them.
           </motion.p>
 
           {/* Buttons */}
@@ -86,7 +86,7 @@ export default function CallToActionSection() {
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Fresh Daily
+              Made Fresh Daily
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -94,7 +94,7 @@ export default function CallToActionSection() {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              Quality Guaranteed
+              Homemade Quality
             </div>
           </motion.div>
         </motion.div>

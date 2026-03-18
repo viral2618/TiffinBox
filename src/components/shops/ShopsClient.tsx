@@ -176,6 +176,15 @@ export default function ShopsClient({
     }
   }, [filters.search, filters.minRating, filters.isOpen, filters.tagIds, searchParams, router])
 
+  const handleSearchSubmit = useCallback((query: string) => {
+    const params = new URLSearchParams()
+    if (query) params.set('search', query)
+    if (searchParams.lat) params.set('lat', searchParams.lat as string)
+    if (searchParams.lng) params.set('lng', searchParams.lng as string)
+    if (searchParams.radius) params.set('radius', searchParams.radius as string)
+    router.push(`/shops${params.toString() ? `?${params.toString()}` : ''}`)
+  }, [router, searchParams])
+
   const handleResultSelect = (result: SearchResult) => {
     if (result.type === 'shop') {
       router.push(`/shops/${result.slug}`)
@@ -195,15 +204,15 @@ export default function ShopsClient({
   }, [dispatch])
 
   const getPageTitle = () => {
-    if (filters.location) return "Bakeries Near You"
+    if (filters.location) return "Home Kitchens Near You"
     if (filters.search) return `Search Results: "${filters.search}"`
-    return "Find Your Perfect Bakery"
+    return "Find Your Perfect Home Kitchen"
   }
 
   const getPageSubtitle = () => {
     if (displayIsNearby) return `Showing bakeries within ${filters.radius || 5}km of your location`
-    if (filters.search) return "Bakeries matching your search criteria"
-    return "Discover fresh baked goods from local bakeries in your area"
+    if (filters.search) return "Home Kitchens matching your search criteria"
+    return "Discover fresh homemade food from local home kitchens in your area"
   }
 
   const containerVariants = {
@@ -240,6 +249,8 @@ export default function ShopsClient({
           <SearchInput
             placeholder="Search for Shops by name or location..."
             onResultSelect={handleResultSelect}
+            onSubmit={handleSearchSubmit}
+            initialValue={searchParams.search as string || ""}
             showDropdown={true}
             className="max-w-3xl mx-auto"
           />
@@ -290,7 +301,7 @@ export default function ShopsClient({
                     <div className="flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-primary" />
                       <p className="text-sm">
-                        Showing bakeries within {filters.radius || 5}km of your location
+                        Showing home kitchens within {filters.radius || 5}km of your location
                       </p>
                     </div>
                     <Button 
@@ -306,7 +317,7 @@ export default function ShopsClient({
                 
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-sm text-muted-foreground">
-                    Found {displayPagination.total} {displayPagination.total === 1 ? "bakery" : "bakeries"}
+                    Found {displayPagination.total} {displayPagination.total === 1 ? "home kitchen" : "home kitchens"}
                   </p>
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal className="h-4 w-4" />
@@ -346,9 +357,9 @@ export default function ShopsClient({
                 <div className="bg-muted/50 p-4 rounded-full mb-4">
                   <Store className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-medium mb-2">No Bakeries Found</h3>
+                <h3 className="text-xl font-medium mb-2">No Home Kitchens Found</h3>
                 <p className="text-muted-foreground mb-6 max-w-md">
-                  We couldn't find any bakeries matching your criteria. Try adjusting your filters or search for something else.
+                  We couldn't find any home kitchens matching your criteria. Try adjusting your filters or search for something else.
                 </p>
                 <Button 
                   variant="outline"
@@ -381,7 +392,7 @@ export default function ShopsClient({
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
             <SheetHeader>
-              <SheetTitle>Filter Bakeries</SheetTitle>
+              <SheetTitle>Filter Home Kitchens</SheetTitle>
             </SheetHeader>
             <FilterSidebar className="pt-4 pl-4 pr-4" />
             <div className="mt-6 pt-4 border-t">

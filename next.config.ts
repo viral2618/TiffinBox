@@ -130,7 +130,6 @@
 
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
-import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
   images: {
@@ -229,17 +228,4 @@ const pwaConfig = withPWA({
   runtimeCaching: []
 })(nextConfig as any);
 
-// Wrap with Sentry for error tracking
-export default withSentryConfig(pwaConfig, {
-  org: "bugsink",
-  project: "whenfresh",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  sourcemaps: {
-    disable: true,
-  },
-  disableLogger: true,
-});
+export default pwaConfig;

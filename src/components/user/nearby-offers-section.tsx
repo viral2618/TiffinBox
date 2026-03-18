@@ -56,15 +56,15 @@ export default function NearbyShopsSection() {
   if (loading) {
     return (
       <section className="py-8 px-4 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6" style={{ color: '#451a03' }}>
+        <h2 className="text-2xl font-bold mb-6" style={{ color: '#134e4a' }}>
           Nearby Shops
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded"></div>
+              <div className="h-48 bg-teal-100 rounded-lg mb-4"></div>
+              <div className="h-4 bg-teal-100 rounded mb-2"></div>
+              <div className="h-3 bg-teal-100 rounded"></div>
             </div>
           ))}
         </div>
@@ -75,11 +75,11 @@ export default function NearbyShopsSection() {
   if (shops.length === 0) {
     return (
       <section className="py-8 px-4 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6" style={{ color: '#451a03' }}>
+        <h2 className="text-2xl font-bold mb-6" style={{ color: '#134e4a' }}>
           Nearby Shops
         </h2>
         <div className="text-center py-8">
-          <p className="text-gray-500">No shops found in your area</p>
+          <p className="text-[#0f766e]">No shops found in your area</p>
         </div>
       </section>
     )
@@ -87,7 +87,7 @@ export default function NearbyShopsSection() {
 
   return (
     <section className="py-8 px-4 max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6" style={{ color: '#451a03' }}>
+      <h2 className="text-2xl font-bold mb-6" style={{ color: '#134e4a' }}>
         Nearby Shops
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -96,7 +96,7 @@ export default function NearbyShopsSection() {
             key={shop.id}
             onClick={() => handleShopClick(shop)}
             className="cursor-pointer group rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300"
-            style={{ backgroundColor: '#fef3e2', border: '1px solid rgba(69, 26, 3, 0.1)' }}
+            style={{ backgroundColor: '#ccfbf1', border: '1px solid rgba(13,148,136,0.15)' }}
           >
             <div className="relative aspect-video overflow-hidden">
               {shop.bannerImage || shop.logoUrl ? (
@@ -109,9 +109,9 @@ export default function NearbyShopsSection() {
               ) : (
                 <div 
                   className="w-full h-full flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #fef3e2 0%, #f3e8d3 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)' }}
                 >
-                  <span className="text-4xl font-bold" style={{ color: '#fc7c7c' }}>
+                  <span className="text-4xl font-bold" style={{ color: '#0d9488' }}>
                     {shop.name.charAt(0)}
                   </span>
                 </div>
@@ -119,17 +119,17 @@ export default function NearbyShopsSection() {
             </div>
 
             <div className="p-4">
-              <h3 className="font-semibold mb-2" style={{ color: '#451a03' }}>
+              <h3 className="font-semibold mb-2" style={{ color: '#134e4a' }}>
                 {shop.name}
               </h3>
               
               {shop.description && (
-                <p className="text-sm mb-3 line-clamp-2" style={{ color: '#92400e' }}>
+                <p className="text-sm mb-3 line-clamp-2" style={{ color: '#0f766e' }}>
                   {shop.description}
                 </p>
               )}
 
-              <div className="flex items-center justify-between text-xs" style={{ color: '#92400e' }}>
+              <div className="flex items-center justify-between text-xs" style={{ color: '#0f766e' }}>
                 {shop.distance && (
                   <div className="flex items-center space-x-1">
                     <MapPin className="h-3 w-3" />

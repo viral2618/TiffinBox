@@ -90,7 +90,7 @@ export default async function DishesPage({ searchParams }: DishesPageProps) {
         <div className="flex flex-col space-y-8">
           <div className="text-center max-w-3xl mx-auto mb-4">
             <h1 className="section-header text-4xl font-semibold mb-3">{pageTitle}</h1>
-            <p className="text-lg" style={{ color: '#451a03' }}>{pageSubtitle}</p>
+            <p className="text-lg" style={{ color: '#0f766e' }}>{pageSubtitle}</p>
           </div>
         
         <div className="max-w-3xl mx-auto w-full">

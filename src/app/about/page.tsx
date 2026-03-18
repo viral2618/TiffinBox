@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Us | WhenFresh',
-  description: 'Learn about WhenFresh, our mission, and how we connect food lovers with the freshest dishes.',
+  title: 'About Us | TiffinLane',
+  description: 'Learn about TiffinLane, our mission, and how we connect students with local home cooks serving authentic homemade food.',
 };
 
 // Rich text renderer component
@@ -39,7 +39,7 @@ export default async function AboutPage() {
     return (
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-6">About Us</h1>
-        <p>Information about WhenFresh is currently unavailable. Please check back later.</p>
+        <p>Information about TiffinLane is currently unavailable. Please check back later.</p>
       </div>
     );
   }

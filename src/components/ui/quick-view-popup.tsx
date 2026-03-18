@@ -1,6 +1,7 @@
 "use client"
 
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { X, Star, MapPin, Clock, ChefHat } from 'lucide-react'
 import { formatPrice, formatTime } from '@/lib/utils'
@@ -35,7 +36,14 @@ interface QuickViewPopupProps {
 }
 
 export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = false }: QuickViewPopupProps) {
-  if (!isOpen) return null
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  if (!isOpen || !mounted) return null
 
   const shopData = item.shop ? {
     ...item.shop,
@@ -125,20 +133,21 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
     }
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center z-50 p-0 md:p-4 pb-16 md:pb-0" onClick={onClose}>
-      <div className="bg-white rounded-t-2xl md:rounded-lg max-w-3xl w-full max-h-[80vh] md:max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="rounded-t-2xl md:rounded-2xl max-w-3xl w-full max-h-[80vh] md:max-h-[85vh] overflow-hidden" style={{ backgroundColor: '#ffffff', border: '1.5px solid var(--brand-border)', boxShadow: '0 24px 64px rgba(13,148,136,0.18)' }} onClick={(e) => e.stopPropagation()}>
         <div className="relative flex flex-col md:flex-row h-auto md:h-[550px]">
           {/* Close Button */}
           <button 
             onClick={onClose}
-            className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-colors"
+            style={{ backgroundColor: 'var(--brand-warm)', color: 'var(--brand-text)' }}
           >
             <X className="w-4 h-4" />
           </button>
           
           {/* Left Side - Product Image */}
-          <div className="w-full md:w-1/2 p-0 md:p-4 flex flex-col justify-center bg-gray-50">
+          <div className="w-full md:w-1/2 p-0 md:p-4 flex flex-col justify-center" style={{ backgroundColor: 'var(--brand-cream)' }}>
             <div className="flex items-center justify-center">
               <div className="w-full h-56 md:w-64 md:h-64 relative">
                 {item.imageUrls && item.imageUrls.length > 0 ? (
@@ -150,8 +159,8 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
                     sizes="(max-width: 768px) 100vw, 320px"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                    <span className="text-gray-500 text-3xl md:text-4xl font-bold">
+                  <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-warm) 0%, var(--brand-muted) 100%)' }}>
+                    <span className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--brand-primary)' }}>
                       {item.name.charAt(0)}
                     </span>
                   </div>
@@ -163,7 +172,7 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
             {item.imageUrls && item.imageUrls.length > 1 && (
               <div className="flex gap-2 justify-center mt-3 px-4 md:px-0">
                 {item.imageUrls.slice(0, 4).map((url, index) => (
-                  <div key={index} className="w-10 h-10 md:w-14 md:h-14 relative rounded overflow-hidden border-2 border-gray-200">
+                  <div key={index} className="w-10 h-10 md:w-14 md:h-14 relative rounded overflow-hidden" style={{ border: '2px solid var(--brand-border)' }}>
                     <Image
                       src={url}
                       alt={`${item.name} ${index + 1}`}
@@ -180,7 +189,7 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
           {/* Right Side - Product Details */}
           <div className="w-full md:w-1/2 p-4 md:p-5 overflow-y-auto max-h-[45vh] md:max-h-full mb-6 md:mb-0">
             {/* Product Name */}
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 uppercase tracking-wide mb-3 sm:mb-4 pr-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wide mb-3 sm:mb-4 pr-8" style={{ color: 'var(--brand-text)' }}>
               {item.name}
             </h2>
 
@@ -189,13 +198,13 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
                 <CurrencyConverter basePrice={item.price} />
                 {priceData.originalPrice && priceData.originalPrice > item.price && (
-                  <span className="text-base sm:text-xl text-gray-500 line-through">
+                  <span className="text-base sm:text-xl line-through" style={{ color: 'var(--brand-subtext)' }}>
                     {formatPrice(priceData.originalPrice)}
                   </span>
                 )}
               </div>
               {calculatedDiscount > 0 && (
-                <span className="bg-red-100 text-red-800 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium">
+                <span className="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>
                   {calculatedDiscount}% OFF
                 </span>
               )}
@@ -203,11 +212,11 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
 
             {/* Product Description */}
             {item.description ? (
-              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
+              <p className="text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6" style={{ color: 'var(--brand-subtext)' }}>
                 {item.description}
               </p>
             ) : (
-              <p className="text-gray-500 italic mb-4 sm:mb-6 text-xs sm:text-sm">No description available</p>
+              <p className="italic mb-4 sm:mb-6 text-xs sm:text-sm" style={{ color: 'var(--brand-subtext)' }}>No description available</p>
             )}
 
             {/* Scheduling Info */}
@@ -220,7 +229,7 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
                    dishStatus.status === 'preparing' ? 'Preparing Soon' : 'Not Available'}
                 </h3>
               </div>
-              <div className="text-xs sm:text-sm text-gray-600 space-y-1">
+              <div className="text-xs sm:text-sm space-y-1" style={{ color: 'var(--brand-subtext)' }}>
                 <p>• {dishStatus.message}</p>
                 {item.timings && item.timings[0] && (
                   <>
@@ -233,7 +242,7 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
 
             {/* Shop Info */}
             {showShopInfo && shopData && (
-              <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6" style={{ backgroundColor: 'var(--brand-cream)', border: '1px solid var(--brand-border)' }}>
                 {shopData.logoUrl ? (
                   <Image
                     src={shopData.logoUrl}
@@ -248,8 +257,8 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg truncate">{shopData.name}</h3>
-                  <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                  <h3 className="font-semibold text-base sm:text-lg truncate" style={{ color: 'var(--brand-text)' }}>{shopData.name}</h3>
+                  <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm" style={{ color: 'var(--brand-subtext)' }}>
                     <div className="flex items-center gap-1">
                       <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{formatDistance(shopData.distance)}</span>
@@ -274,5 +283,5 @@ export function QuickViewPopup({ isOpen, onClose, item, actions, showShopInfo = 
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { ThemeProvider } from "./theme-provider";
 import { AuthProvider } from "./auth-provider";
 import { ReduxProvider } from "./redux-provider";
-import { BugsinkProvider } from "./bugsink-provider";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import Navbar from "../user/navbar";
 import { usePathname } from "next/navigation";
@@ -21,8 +20,7 @@ export function Providers({ children }: ProvidersProps) {
   const showNavbar = !pathname?.startsWith("/owner/");
 
   return (
-    <BugsinkProvider>
-      <ReduxProvider>
+    <ReduxProvider>
         <AuthProvider>
           <ThemeProvider
             attribute="class"
@@ -39,7 +37,6 @@ export function Providers({ children }: ProvidersProps) {
             </CurrencyProvider>
           </ThemeProvider>
         </AuthProvider>
-      </ReduxProvider>
-    </BugsinkProvider>
+    </ReduxProvider>
   );
 }

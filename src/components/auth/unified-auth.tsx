@@ -188,18 +188,23 @@ export default function UnifiedAuth() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-background via-background to-accent/10">
+    <div className="flex items-center justify-center min-h-screen p-4" style={{ background: 'linear-gradient(150deg, #f0fdfa 0%, #ccfbf1 50%, #99f6e4 100%)' }}>
       <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Welcome to When Fresh
+        <CardHeader className="text-center pb-2 pt-8">
+          <div className="flex justify-center mb-4">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg">
+              <img src="/icons/icon-96x96.svg" alt="TiffinLane" className="w-full h-full" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold" style={{ background: 'linear-gradient(135deg,#134e4a,#0d9488)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Welcome to TiffinLane
           </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Choose your account type to continue
+          <CardDescription style={{ color: '#0f766e' }}>
+            Home-cooked meals, just like mom makes
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="p-6">
+        <CardContent className="p-6 pt-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Tab Navigation */}
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
@@ -229,7 +234,7 @@ export default function UnifiedAuth() {
             <TabsContent value="user-signin" className="space-y-4">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold">Sign In as User</h3>
-                <p className="text-sm text-muted-foreground">Access your account to browse and order</p>
+        <p className="text-sm text-muted-foreground">Access your account to browse and order homemade food</p>
               </div>
               
               <form onSubmit={handleUserSignin} className="space-y-4">
@@ -276,7 +281,7 @@ export default function UnifiedAuth() {
             <TabsContent value="user-signup" className="space-y-4">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold">Create User Account</h3>
-                <p className="text-sm text-muted-foreground">Join When Fresh to start ordering</p>
+                <p className="text-sm text-muted-foreground">Join TiffinLane to start ordering homemade food</p>
               </div>
               
               <form onSubmit={handleUserSignup} className="space-y-4">
@@ -386,7 +391,7 @@ export default function UnifiedAuth() {
             <TabsContent value="owner-signup" className="space-y-4">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold">Create Owner Account</h3>
-                <p className="text-sm text-muted-foreground">Register your shop on When Fresh</p>
+                <p className="text-sm text-muted-foreground">Register your home kitchen on TiffinLane</p>
               </div>
               
               <form onSubmit={handleOwnerSignup} className="space-y-4">

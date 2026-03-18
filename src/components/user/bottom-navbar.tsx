@@ -32,8 +32,17 @@ export default function BottomNavbar() {
 
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden w-[95%] max-w-md">
-      <div className="bottom-navbar bg-background/95 backdrop-blur-md border border-border/20 rounded-full shadow-xl" style={{ backgroundColor: 'rgba(254, 247, 237, 0.95)', border: '1px solid rgba(69, 26, 3, 0.1)' }}>
-        <div className="flex justify-around h-16 items-center">
+      <div
+        className="flex justify-around h-16 items-center px-2"
+        style={{
+          background: 'rgba(240,253,250,0.97)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1.5px solid #99f6e4',
+          borderRadius: '9999px',
+          boxShadow: '0 8px 32px rgba(13,148,136,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+        }}
+      >
           {displayLinks.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href
             return (
@@ -44,24 +53,23 @@ export default function BottomNavbar() {
                     isActive ? "text-primary" : "text-foreground/70"
                   )} 
                   fill={isActive ? "currentColor" : "none"} 
-                  style={{ color: isActive ? '#fc7c7c' : '#451a03' }}
+                  style={{ color: isActive ? '#0d9488' : '#0f766e' }}
                 />
                 <span 
                   className={cn(
                     "text-xs transition-all", 
-                    isActive ? "text-primary font-semibold" : "text-foreground/70"
+                    isActive ? "font-semibold" : ""
                   )}
-                  style={{ color: isActive ? '#fc7c7c' : '#451a03' }}
+                  style={{ color: isActive ? '#0d9488' : '#0f766e' }}
                 >
                   {label}
                 </span>
                 {isActive && (
-                  <div className="absolute -bottom-1 w-8 h-1 bg-primary rounded-full" style={{ backgroundColor: '#fc7c7c' }} />
+                  <div className="absolute -bottom-1 w-6 h-1 rounded-full" style={{ background: 'linear-gradient(90deg,#0d9488,#f59e0b)' }} />
                 )}
               </Link>
             )
           })}
-        </div>
       </div>
     </nav>
   )

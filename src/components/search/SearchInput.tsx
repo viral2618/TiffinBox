@@ -179,19 +179,18 @@ export default function SearchInput({
     <div ref={containerRef} className={cn("relative w-full", className)}>
       <form onSubmit={handleSubmit} className="relative">
         <div 
-          className={cn(
-            "relative flex items-center w-full rounded-lg border transition-all duration-200",
-            isFocused 
-              ? "border-gray-300" 
-              : "border-gray-200 hover:border-gray-300"
-          )}
+          className="relative flex items-center w-full transition-all duration-200"
           style={{
-            height: '48px',
-            backgroundColor: 'rgba(252, 124, 124, 0.1)',
-            borderRadius: '8px',
-            border: '1px solid rgba(252, 124, 124, 0.3)'
+            height: '52px',
+            backgroundColor: 'var(--brand-warm)',
+            borderRadius: '12px',
+            border: isFocused ? '1.5px solid var(--brand-primary)' : '1.5px solid var(--brand-border)',
+            boxShadow: isFocused ? '0 0 0 3px rgba(13,148,136,0.15)' : '0 1px 4px rgba(13,148,136,0.08)',
+            padding: '0 6px 0 16px',
           }}
         >
+          {/* Left search icon */}
+          <Search className="h-4 w-4 shrink-0 mr-3" style={{ color: 'var(--brand-subtext)' }} />
          
           {/* Input */}
           <input
@@ -203,11 +202,12 @@ export default function SearchInput({
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="flex-1 h-full bg-transparent border-none outline-none pr-12 search-input"
+            className="flex-1 h-full bg-transparent border-none outline-none search-input"
             style={{
-              color: '#451a03',
-              fontSize: '16px',
-              fontWeight: '500'
+              color: 'var(--brand-text)',
+              fontSize: '15px',
+              fontWeight: '400',
+              paddingLeft: 0,
             }}
             autoComplete="off"
             spellCheck="false"
@@ -223,9 +223,10 @@ export default function SearchInput({
                 transition={{ duration: 0.15 }}
                 type="button"
                 onClick={handleClear}
-                className="flex items-center justify-center w-8 h-8 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150"
+                className="flex items-center justify-center w-7 h-7 rounded-full shrink-0 transition-colors duration-150"
+                style={{ backgroundColor: 'var(--brand-border)', marginRight: '6px' }}
               >
-                <X className="h-4 w-4" style={{ color: '#fc7c7c' }} />
+                <X className="h-3.5 w-3.5" style={{ color: 'var(--brand-text)' }} />
               </motion.button>
             )}
           </AnimatePresence>
@@ -234,23 +235,20 @@ export default function SearchInput({
           <button
             type="submit"
             disabled={!query.trim()}
-            className="flex items-center justify-center w-12 h-12 mr-2 rounded-full transition-all duration-200 hover:scale-105"
+            className="flex items-center justify-center shrink-0 transition-all duration-200 hover:opacity-90"
             style={{
-              backgroundColor: query.trim() ? '#fc7c7c' : 'rgba(146, 64, 14, 0.3)',
+              width: '38px',
+              height: '38px',
+              borderRadius: '8px',
+              backgroundColor: query.trim() ? 'var(--brand-primary)' : 'var(--brand-muted)',
               color: 'white',
-              cursor: query.trim() ? 'pointer' : 'not-allowed'
+              cursor: query.trim() ? 'pointer' : 'not-allowed',
             }}
           >
             <Search className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Loading Indicator */}
-        {isLoading && (
-          <div className="absolute right-14 top-1/2 transform -translate-y-1/2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-primary"></div>
-          </div>
-        )}
       </form>
 
       {/* Search Dropdown */}

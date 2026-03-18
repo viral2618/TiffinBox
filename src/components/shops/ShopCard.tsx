@@ -67,9 +67,10 @@ export default function ShopCard({ shop }: ShopCardProps) {
 
   return (
     <motion.div 
-      whileHover={{ y: -5 }} 
+      whileHover={{ y: -6 }} 
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group"
+      className="group rounded-2xl overflow-hidden"
+      style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}
     >
       {/* Image Carousel */}
       <div className="relative overflow-hidden rounded-3xl">
@@ -180,7 +181,7 @@ export default function ShopCard({ shop }: ShopCardProps) {
       </div>
 
       {/* Content */}
-      <div className="px-1 pt-4">
+      <div className="px-4 pt-3 pb-4">
         <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors text-center">
           {shop.name}
         </h3>

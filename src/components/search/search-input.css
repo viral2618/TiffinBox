@@ -1,8 +1,10 @@
 .search-input::placeholder {
-  color: rgba(69, 26, 3, 0.6);
+  color: var(--brand-subtext);
+  opacity: 0.6;
   font-weight: 400;
 }
 
 .search-input:focus::placeholder {
-  color: rgba(69, 26, 3, 0.4);
+  color: var(--brand-subtext);
+  opacity: 0.4;
 }

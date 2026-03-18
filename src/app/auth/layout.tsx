@@ -2,8 +2,8 @@ import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: 'Authentication - WhenFresh',
-  description: 'Sign in or create an account to access WhenFresh',
+  title: 'Authentication - TiffinLane',
+  description: 'Sign in or create an account to access TiffinLane',
 };
 
 export const viewport: Viewport = {

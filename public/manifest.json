@@ -1,11 +1,11 @@
 {
-  "name": "WhenFresh",
-  "short_name": "WhenFresh",
-  "description": "Find fresh food near you",
+  "name": "TiffinLane",
+  "short_name": "TiffinLane",
+  "description": "Home-cooked meals by local cooks — made for students missing mom's food",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#fef7ed",
+  "theme_color": "#f97316",
   "orientation": "portrait",
   "icons": [
     {

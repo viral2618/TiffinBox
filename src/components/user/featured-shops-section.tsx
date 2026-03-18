@@ -304,8 +304,8 @@ export default function FeaturedShopsSection() {
         {/* Section Header with View More Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <SectionTitle 
-            title="FEATURED SHOPS" 
-            subtitle="Discover the best local bakeries and food products in your area" 
+            title="FEATURED HOME KITCHENS" 
+            subtitle="Discover the best local home cooks serving authentic homemade food in your area" 
           />
           <div className="mt-4 md:mt-0">
             <ViewMoreButton href="/shops" text="View All Shops" />

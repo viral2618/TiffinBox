@@ -132,7 +132,7 @@ export default function DishCard({ dish }: DishCardProps) {
   const convertedOriginalPrice = dish.originalPrice ? convertPrice(dish.originalPrice, dishCurrency) : null
 
   return (
-    <div onClick={handleCardClick} className="rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer" style={{ backgroundColor: '#fef3e2', border: '1px solid rgba(69, 26, 3, 0.1)' }}>
+    <div onClick={handleCardClick} className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer card-hover" style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}>
       {/* Dish Image */}
       <div className="aspect-square relative overflow-hidden">
         {dish.imageUrls && dish.imageUrls.length > 0 ? (
@@ -145,8 +145,8 @@ export default function DishCard({ dish }: DishCardProps) {
             onError={() => handleImageError('image-0')}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fef3e2 0%, #f3e8d3 100%)' }}>
-            <span className="text-4xl font-bold text-center" style={{ color: '#fc7c7c' }}>
+          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)' }}>
+            <span className="text-4xl font-bold text-center" style={{ color: '#0d9488' }}>
               {dish.name.charAt(0)}
             </span>
           </div>
@@ -159,7 +159,7 @@ export default function DishCard({ dish }: DishCardProps) {
               onClick={handleSetReminder}
               disabled={isReminderSet}
               className="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:scale-110"
-              style={{ backgroundColor: '#fc7c7c', color: 'white' }}
+              style={{ backgroundColor: '#0d9488', color: 'white' }}
               title="Set Reminder"
             >
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -168,7 +168,7 @@ export default function DishCard({ dish }: DishCardProps) {
               onClick={handleToggleFavorite}
               disabled={loading}
               className="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:scale-110"
-              style={{ backgroundColor: isFavorite ? '#dc2626' : '#fc7c7c', color: 'white' }}
+              style={{ backgroundColor: isFavorite ? '#dc2626' : '#0d9488', color: 'white' }}
               title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             >
               <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5" filled={isFavorite} />
@@ -176,7 +176,7 @@ export default function DishCard({ dish }: DishCardProps) {
             <button 
               onClick={handleQuickView}
               className="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:scale-110"
-              style={{ backgroundColor: '#fc7c7c', color: 'white' }}
+              style={{ backgroundColor: '#0d9488', color: 'white' }}
               title="Quick View"
             >
               <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -220,11 +220,11 @@ export default function DishCard({ dish }: DishCardProps) {
       {/* Dish Info */}
       <div className="block p-4 transition-colors">
         <div className="text-center mb-3">
-          <h3 className="font-semibold mb-1 text-lg" style={{ color: '#451a03' }}>
+          <h3 className="font-semibold mb-1 text-lg" style={{ color: '#134e4a' }}>
             {dish.name}
           </h3>
           {dish.description && (
-            <p className="text-sm line-clamp-2 mb-2" style={{ color: '#92400e' }}>
+            <p className="text-sm line-clamp-2 mb-2" style={{ color: '#0f766e' }}>
               {dish.description}
             </p>
           )}
@@ -235,7 +235,7 @@ export default function DishCard({ dish }: DishCardProps) {
           {dish.shop.logoUrl ? (
             <Image src={dish.shop.logoUrl} alt={dish.shop.name} width={20} height={20} className="rounded-full" />
           ) : (
-            <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fc7c7c' }}>
+            <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#0d9488' }}>
               <span className="text-xs font-bold text-white">{dish.shop.name.charAt(0)}</span>
             </div>
           )}
@@ -243,9 +243,9 @@ export default function DishCard({ dish }: DishCardProps) {
           {dish.avgRating > 0 && (
             <div className="flex items-center space-x-1">
               <span className="text-yellow-500">★</span>
-              <span className="text-xs" style={{ color: '#92400e' }}>{dish.avgRating.toFixed(1)}</span>
+              <span className="text-xs" style={{ color: '#0f766e' }}>{dish.avgRating.toFixed(1)}</span>
               {dish.reviews.length > 0 && (
-                <span className="text-xs" style={{ color: '#92400e' }}>({dish.reviews.length})</span>
+                <span className="text-xs" style={{ color: '#0f766e' }}>({dish.reviews.length})</span>
               )}
             </div>
           )}
@@ -255,15 +255,15 @@ export default function DishCard({ dish }: DishCardProps) {
         <div className="text-center">
           {convertedOriginalPrice && dish.discountPercentage ? (
             <div className="flex items-center justify-center space-x-2">
-              <p className="text-sm line-through" style={{ color: '#92400e' }}>
+              <p className="text-sm line-through" style={{ color: '#0f766e' }}>
                 {formatPrice(convertedOriginalPrice)}
               </p>
-              <p className="text-xl font-bold" style={{ color: '#fc7c7c' }}>
+              <p className="text-xl font-bold" style={{ color: '#0d9488' }}>
                 {formatPrice(convertedPrice)}
               </p>
             </div>
           ) : (
-            <p className="text-xl font-bold" style={{ color: '#451a03' }}>
+            <p className="text-xl font-bold" style={{ color: '#134e4a' }}>
               {formatPrice(convertedPrice)}
             </p>
           )}

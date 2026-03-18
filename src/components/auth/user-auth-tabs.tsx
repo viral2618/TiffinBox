@@ -41,7 +41,7 @@ function PasswordStrength({ password }: { password: string }) {
         <span>Password strength:</span>
         <span style={{ color: getColor() }}>{getLabel()}</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="w-full bg-[#ccfbf1] rounded-full h-2">
         <div 
           className="h-2 rounded-full transition-all duration-300"
           style={{ 
@@ -216,10 +216,10 @@ export default function UserAuthTabs() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-2 sm:p-4" style={{ backgroundColor: '#fef7ed' }}>
+    <div className="flex items-center justify-center min-h-screen p-2 sm:p-4" style={{ backgroundColor: '#f0fdfa' }}>
       <Card className="w-full max-w-sm sm:max-w-md">
         <CardHeader className="px-4 py-4 sm:px-6 sm:py-6">
-          <CardTitle className="text-lg sm:text-xl">Welcome to When Fresh</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Welcome to TiffinLane</CardTitle>
           <CardDescription className="text-sm">
             Sign in to your account or create a new one
           </CardDescription>

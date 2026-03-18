@@ -28,13 +28,13 @@ export default function CategoryCard({
       <motion.div
         variants={variants}
         className="flex flex-col category-card"
-        style={{ backgroundColor: '#fef3e2', border: '1px solid rgba(69, 26, 3, 0.1)', borderRadius: '8px', padding: '12px' }}
+        style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', borderRadius: '1rem', padding: '12px', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}
       >
         <div
           className="cursor-pointer group"
           onClick={() => router.push(`/dishes?categoryId=${category.id}`)}
         >
-          <div className="relative w-full aspect-[3/2] overflow-hidden rounded-lg" style={{ border: '2px solid rgba(252, 124, 124, 0.2)' }}>
+          <div className="relative w-full aspect-[3/2] overflow-hidden rounded-lg" style={{ border: '2px solid rgba(13, 148, 136, 0.15)' }}>
             {category.imageUrl ? (
               <Image
                 src={category.imageUrl}
@@ -47,7 +47,7 @@ export default function CategoryCard({
                 className="w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 ease-in-out"
                 style={{ backgroundColor: '#ffffff' }}
               >
-                <span className="text-4xl font-bold" style={{ color: '#fc7c7c' }}>{category.name.charAt(0)}</span>
+                <span className="text-4xl font-bold" style={{ color: '#0d9488' }}>{category.name.charAt(0)}</span>
               </div>
             )}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
@@ -62,12 +62,12 @@ export default function CategoryCard({
             <div className="flex items-center justify-between">
               <h3 
                 className={`${isHomePage ? 'text-lg' : 'text-2xl'} font-bold uppercase tracking-wider hover:text-primary transition-colors`}
-                style={{ color: '#451a03' }}
+                style={{ color: '#134e4a' }}
               >
                 {category.name}
               </h3>
               <div className="flex items-center">
-                <div className="w-12 h-0.5 mr-2" style={{ backgroundColor: '#fc7c7c' }}></div>
+                <div className="w-12 h-0.5 mr-2" style={{ backgroundColor: '#0d9488' }}></div>
                 {category.subcategories && category.subcategories.length > 0 && (
                   <span className="text-sm font-normal" style={{ color: '#451a03' }}>({category.subcategories.length})</span>
                 )}
@@ -83,7 +83,7 @@ export default function CategoryCard({
               variant="ghost"
               size="sm"
               className="text-xs flex items-center gap-1 hover:bg-accent/50"
-              style={{ color: '#451a03' }}
+              style={{ color: '#0f766e' }}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsModalOpen(true);

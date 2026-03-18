@@ -61,16 +61,26 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        mounted && isScrolled ? "bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm" : "bg-transparent"
+        mounted && isScrolled
+          ? "shadow-md"
+          : ""
       }`}
+      style={{
+        background: mounted && isScrolled
+          ? 'rgba(240,253,250,0.96)'
+          : 'rgba(240,253,250,0.75)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: mounted && isScrolled ? '1.5px solid #99f6e4' : '1.5px solid transparent',
+      }}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Mobile Header: Logo on left, Profile on right */}
           <div className="lg:hidden flex items-center justify-between w-full">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-400 via-red-400 to-pink-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-                <span className="text-white font-bold text-sm drop-shadow-sm">SB</span>
+              <div className="w-9 h-9 rounded-lg overflow-hidden shadow-md group-hover:shadow-lg transition-all duration-300">
+                <img src="/icons/icon-96x96.svg" alt="TiffinLane" className="w-full h-full" />
               </div>
             </Link>
             {isAuthenticated ? (
@@ -133,12 +143,12 @@ export default function Navbar() {
           {/* Desktop Header */}
           <div className="hidden lg:flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 via-red-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <span className="text-white font-bold text-lg drop-shadow-sm">SB</span>
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <img src="/icons/icon-96x96.svg" alt="TiffinLane" className="w-full h-full" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">Sweet Bakery</h1>
-                <p className="text-xs text-muted-foreground font-medium">Fresh Daily</p>
+                <h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">TiffinLane</h1>
+                <p className="text-xs text-muted-foreground font-medium">Ghar Ka Khana</p>
               </div>
             </Link>
           </div>

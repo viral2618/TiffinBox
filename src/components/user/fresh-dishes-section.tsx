@@ -110,8 +110,8 @@ export default function FreshDishesSection() {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <SectionTitle 
-            title="Fresh Dishes Near Me" 
-            subtitle="Discover freshly prepared dishes from nearby bakeries" 
+            title="Fresh Home Meals Near Me" 
+            subtitle="Discover freshly prepared homemade dishes from local cooks nearby" 
           />
           <div className="mt-4 md:mt-0">
             <ViewMoreButton href="/dishes" text="View All Dishes" />

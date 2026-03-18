@@ -122,15 +122,24 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
     setRadiusValue(value[0])
   }
   
-  // Apply filters
+  // Apply filters — push URL directly so server re-fetches
   const applyFilters = () => {
+    const params = new URLSearchParams()
+    if (selectedTags.length > 0) selectedTags.forEach(id => params.append('tagIds', id))
+    if (minRating > 0) params.set('minRating', minRating.toString())
+    if (isOpenOnly) params.set('isOpen', 'true')
+    if (localLocation) {
+      params.set('lat', localLocation.lat.toString())
+      params.set('lng', localLocation.lng.toString())
+      params.set('radius', radiusValue.toString())
+    }
+    // Dispatch to Redux so active filter badges update
     dispatch(setFilter({ key: "tagIds", value: selectedTags.length > 0 ? selectedTags : undefined }))
     dispatch(setFilter({ key: "location", value: localLocation }))
     dispatch(setFilter({ key: "radius", value: radiusValue }))
     dispatch(setFilter({ key: "minRating", value: minRating > 0 ? minRating : undefined }))
     dispatch(setFilter({ key: "isOpen", value: isOpenOnly || undefined }))
-    
-    // Scroll to top when filters are applied
+    router.push(`/shops${params.toString() ? `?${params.toString()}` : ''}`)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   
@@ -141,25 +150,23 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
     setRadiusValue(5)
     setMinRating(0)
     setIsOpenOnly(false)
-    
     dispatch(setFilter({ key: "tagIds", value: undefined }))
     dispatch(setFilter({ key: "location", value: null }))
     dispatch(setFilter({ key: "radius", value: 5 }))
     dispatch(setFilter({ key: "minRating", value: undefined }))
     dispatch(setFilter({ key: "isOpen", value: undefined }))
     dispatch(setFilter({ key: "search", value: "" }))
-    
-    // Scroll to top when filters are reset
+    router.push('/shops')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   
 
   
   const filterContent = (
-    <div className={cn("flex flex-col h-full filter-sidebar", className)} style={{ backgroundColor: '#fef3e2', color: '#451a03', border: '1px solid rgba(69, 26, 3, 0.1)', borderRadius: '8px', padding: '16px' }}>
+    <div className={cn("flex flex-col h-full filter-sidebar", className)} style={{ backgroundColor: 'var(--brand-cream)', color: 'var(--brand-text)', border: '1.5px solid var(--brand-border)', borderRadius: '8px', padding: '16px' }}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Filter className="h-4 w-4" /> Filter Bakeries
+          <Filter className="h-4 w-4" /> Filter Home Kitchens
         </h2>
         {activeFiltersCount > 0 && (
           <Button 
@@ -179,7 +186,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
           <p className="text-sm text-muted-foreground mb-2">Active Filters:</p>
           <div className="flex flex-wrap gap-1">
             {filters.tagIds && filters.tagIds.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-gray-400">
+              <Badge variant="secondary" className="flex items-center gap-1" style={{backgroundColor:'var(--brand-warm)',color:'var(--brand-subtext)',border:'1px solid var(--brand-border)'}}>
                 {filters.tagIds.length} Tag{filters.tagIds.length > 1 ? 's' : ''}
                 <button 
                   onClick={() => {
@@ -193,7 +200,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
               </Badge>
             )}
             {filters.minRating && filters.minRating > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-gray-400">
+              <Badge variant="secondary" className="flex items-center gap-1" style={{backgroundColor:'var(--brand-warm)',color:'var(--brand-subtext)',border:'1px solid var(--brand-border)'}}>
                 {filters.minRating}+ Stars
                 <button 
                   onClick={() => {
@@ -207,7 +214,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
               </Badge>
             )}
             {filters.isOpen && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-gray-400">
+              <Badge variant="secondary" className="flex items-center gap-1" style={{backgroundColor:'var(--brand-warm)',color:'var(--brand-subtext)',border:'1px solid var(--brand-border)'}}>
                 Open Now
                 <button 
                   onClick={() => {
@@ -221,7 +228,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
               </Badge>
             )}
             {filters.location && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-gray-400">
+              <Badge variant="secondary" className="flex items-center gap-1" style={{backgroundColor:'var(--brand-warm)',color:'var(--brand-subtext)',border:'1px solid var(--brand-border)'}}>
                 Near Me
                 <button 
                   onClick={() => dispatch(setFilter({ key: "location", value: null }))}
@@ -232,7 +239,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
               </Badge>
             )}
             {filters.radius && filters.radius !== 5 && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-gray-400">
+              <Badge variant="secondary" className="flex items-center gap-1" style={{backgroundColor:'var(--brand-warm)',color:'var(--brand-subtext)',border:'1px solid var(--brand-border)'}}>
                 {filters.radius}km Radius
                 <button 
                   onClick={() => {
@@ -255,7 +262,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
       <div className="flex-1 overflow-y-auto pr-2 -mr-2">
         {/* Nearest Location */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium mb-3">Find Nearby Bakeries</h3>
+          <h3 className="text-sm font-medium mb-3">Find Nearby Home Kitchens</h3>
           <LocationButton 
             onLocationChange={handleLocationChange}
             variant="outline"
@@ -318,7 +325,7 @@ export default function FilterSidebar({ className }: FilterSidebarProps) {
               onChange={(e) => setIsOpenOnly(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300"
             />
-            <Label htmlFor="open-now" className="cursor-pointer">Show only open bakeries</Label>
+            <Label htmlFor="open-now" className="cursor-pointer">Show only open home kitchens</Label>
           </div>
         </div>
         

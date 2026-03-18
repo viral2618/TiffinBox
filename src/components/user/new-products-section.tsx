@@ -187,25 +187,25 @@ export default function FreshDelightsSection() {
   }
 
   const LoadingSkeleton = () => (
-    <section className="py-24 bg-gray-50">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-12">
-          <div className="h-12 bg-gray-200 rounded-md w-64 mx-auto mb-8 animate-pulse"></div>
+          <div className="h-12 bg-teal-100 rounded-md w-64 mx-auto mb-8 animate-pulse"></div>
           <div className="flex justify-center mb-8">
             <div className="flex space-x-8">
               {tabs.map((_, i) => (
-                <div key={i} className="h-6 bg-gray-200 rounded-md w-32 animate-pulse"></div>
+                <div key={i} className="h-6 bg-teal-100 rounded-md w-32 animate-pulse"></div>
               ))}
             </div>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="aspect-square bg-gray-200 animate-pulse"></div>
+            <div key={i} className="bg-white rounded-lg border border-[#99f6e4] overflow-hidden">
+              <div className="aspect-square bg-teal-50 animate-pulse"></div>
               <div className="p-4 text-center">
-                <div className="h-4 bg-gray-200 rounded-md mb-2 animate-pulse"></div>
-                <div className="h-6 bg-gray-200 rounded-md w-16 mx-auto animate-pulse"></div>
+                <div className="h-4 bg-teal-100 rounded-md mb-2 animate-pulse"></div>
+                <div className="h-6 bg-teal-100 rounded-md w-16 mx-auto animate-pulse"></div>
               </div>
             </div>
           ))}
@@ -220,7 +220,7 @@ export default function FreshDelightsSection() {
 
   if (error) {
     return (
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center">
             <p className="text-red-500 mb-4">{error}</p>
@@ -239,10 +239,10 @@ export default function FreshDelightsSection() {
   const filteredDishes = getFilteredDishes()
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: '#134e4a' }}>
             Featured Dishes
           </h2>
           
@@ -254,9 +254,10 @@ export default function FreshDelightsSection() {
                   onClick={() => setActiveTab(tab)}
                   className={`text-sm md:text-lg font-medium pb-2 border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === tab
-                      ? "text-red-500 border-red-500"
-                      : "text-gray-600 border-transparent hover:text-gray-800"
+                      ? "border-[#0d9488]"
+                      : "border-transparent hover:text-[#134e4a]"
                   }`}
+                  style={{ color: activeTab === tab ? '#0d9488' : '#0f766e' }}
                   aria-pressed={activeTab === tab}
                 >
                   {tab}
@@ -268,7 +269,7 @@ export default function FreshDelightsSection() {
 
         {filteredDishes.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">
+            <p className="text-[#0f766e] text-lg mb-4">
               {activeTab === "Just now bake / Just ready" 
                 ? "No fresh items available right now" 
                 : "No dishes found in your area"}

@@ -1,6 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-    <rect width="100%" height="100%" fill="#000000"/>
-    <text x="50%" y="50%" font-family="Arial" font-size="128" fill="white" text-anchor="middle" dominant-baseline="middle">
-      512
-    </text>
-  </svg>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488"/>
+      <stop offset="100%" style="stop-color:#0f766e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="116" y="224" width="280" height="160" rx="32" fill="white" opacity="0.95"/>
+  <rect x="116" y="180" width="280" height="64" rx="28" fill="white" opacity="0.85"/>
+  <rect x="196" y="148" width="120" height="44" rx="22" fill="white" opacity="0.7"/>
+  <path d="M192 140 Q176 108 192 80" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <path d="M256 140 Q240 108 256 80" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <path d="M320 140 Q304 108 320 80" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <circle cx="256" cy="212" r="22" fill="url(#accent)"/>
+  <text x="256" y="324" font-family="Arial, sans-serif" font-size="72" font-weight="800" fill="#0d9488" text-anchor="middle" dominant-baseline="middle" letter-spacing="6">TL</text>
+</svg>

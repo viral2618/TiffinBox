@@ -8,7 +8,7 @@ export const SECTION_SPACING = {
 // Typography Constants
 export const TYPOGRAPHY = {
   sectionTitle: "text-3xl font-semibold", // Section titles
-  sectionSubtitle: "text-gray-600 mt-2", // Section subtitles
+  sectionSubtitle: "text-[#0f766e] mt-2", // Section subtitles
 }
 
 // Animation Constants

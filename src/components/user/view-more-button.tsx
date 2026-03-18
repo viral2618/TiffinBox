@@ -22,7 +22,7 @@ export default function ViewMoreButton({
         variant="outline"
         size="lg"
         className={cn(
-          "group hover:bg-primary hover:text-primary-foreground transition-all duration-300 bg-transparent border-gray-300",
+          "group hover:bg-primary hover:text-primary-foreground transition-all duration-300 bg-transparent border-border",
           className
         )}
       >
