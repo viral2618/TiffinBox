@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { cache } from "react";
-
-const prisma = new PrismaClient();
 
 export interface Subcategory {
   id: string;
