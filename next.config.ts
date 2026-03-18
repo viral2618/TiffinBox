@@ -132,6 +132,7 @@ import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     domains: [
       'images.pexels.com',
