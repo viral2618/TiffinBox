@@ -6,8 +6,6 @@ import BottomNavbar from "@/components/user/bottom-navbar";
 import PWAProvider from "@/components/pwa/pwa-provider";
 import CardProvider from "@/components/cards/card-provider";
 import { RealtimeProvider } from "@/components/notifications/realtime-provider";
-import FirebaseMessagingInit from "@/components/notifications/firebase-messaging-init";
-import { FCMInitializer } from "@/components/fcm-init";
 import Footer from "@/components/Footer";
 import { initializeRealtimeServices } from "@/lib/init-socket";
 import PerformanceTracker from "@/components/performance/performance-tracker";
@@ -114,8 +112,6 @@ export default function RootLayout({
           <Providers>
             <RealtimeProvider>
               <ScrollToTop />
-              <FCMInitializer />
-              <FirebaseMessagingInit />
               <BetaBanner />
               <main className="min-h-screen pb-32" style={{ backgroundColor: '#f0fdfa', color: '#134e4a', paddingTop: '0' }}>
                 {children}

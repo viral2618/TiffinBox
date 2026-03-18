@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma"
-import { sendPushNotification } from "@/lib/push-notifications"
 import { RealtimeNotificationService } from "./realtime-service"
 
 interface CreateReminderNotificationParams {
@@ -11,9 +10,6 @@ interface CreateReminderNotificationParams {
 }
 
 export class ReminderNotificationService {
-  /**
-   * Creates a reminder notification in the database
-   */
   static async createReminderNotification({
     userId,
     dishId,
@@ -26,7 +22,7 @@ export class ReminderNotificationService {
         data: {
           userId,
           title: "Dish Reminder",
-          message: reminderType === 'immediate' 
+          message: reminderType === 'immediate'
             ? `${dishName} is available now!`
             : `Reminder: ${dishName} will be available soon`,
           type: "reminder",
@@ -34,13 +30,6 @@ export class ReminderNotificationService {
         }
       })
 
-      // Get user's FCM token for push notification
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { fcmToken: true }
-      })
-
-      // Send realtime notification
       await RealtimeNotificationService.sendReminderNotification({
         id: notification.id,
         userId,
@@ -51,15 +40,6 @@ export class ReminderNotificationService {
         scheduledTime
       })
 
-      // Send push notification if user has FCM token
-      if (user?.fcmToken) {
-        await sendPushNotification(
-          user.fcmToken,
-          notification.title,
-          notification.message
-        )
-      }
-
       return notification
     } catch (error) {
       console.error('Error creating reminder notification:', error)
@@ -67,26 +47,15 @@ export class ReminderNotificationService {
     }
   }
 
-  /**
-   * Processes scheduled reminders (would be called by a cron job)
-   */
   static async processScheduledReminders() {
     try {
       const now = new Date()
-      
-      // Find active reminders that should be triggered
+
       const reminders = await prisma.reminder.findMany({
         where: {
           isActive: true,
           OR: [
-            // One-time reminders
-            {
-              isRecurring: false,
-              reminderTime: {
-                lte: now
-              }
-            },
-            // Recurring reminders (simplified logic)
+            { isRecurring: false, reminderTime: { lte: now } },
             {
               isRecurring: true,
               recurringDays: {
@@ -96,22 +65,11 @@ export class ReminderNotificationService {
           ]
         },
         include: {
-          dish: {
-            select: {
-              name: true,
-              timings: true
-            }
-          },
-          user: {
-            select: {
-              id: true,
-              fcmToken: true
-            }
-          }
+          dish: { select: { name: true, timings: true } },
+          user: { select: { id: true } }
         }
       })
 
-      // Process each reminder
       for (const reminder of reminders) {
         await RealtimeNotificationService.sendReminderNotification({
           id: reminder.id,
@@ -123,7 +81,6 @@ export class ReminderNotificationService {
           scheduledTime: reminder.reminderTime || undefined
         })
 
-        // Deactivate one-time reminders after triggering
         if (!reminder.isRecurring) {
           await prisma.reminder.update({
             where: { id: reminder.id },

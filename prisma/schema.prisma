@@ -15,7 +15,6 @@ model User {
   role            String             @default("user")
   phone           String?
   location        GeoLocation?
-  fcmToken        String?
   emailVerified   Boolean            @default(false)
   favoritesShops  UserFavoriteShop[]
   favoritesDishes UserFavoriteDish[]
@@ -28,7 +27,6 @@ model User {
   notificationPreference UserNotificationPreference?
   notifications   Notification[]
   reminders       Reminder[]
-  deviceTokens    DeviceToken[]
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 }
@@ -40,7 +38,6 @@ model Owner {
   phone       String?
   password    String
   role        String   @default("owner")
-  fcmToken    String?
   isOnboarded Boolean  @default(false)
   emailVerified Boolean @default(false)
   shops       Shop[]
@@ -49,7 +46,6 @@ model Owner {
   changePasswordToken   String?
   notificationPreference OwnerNotificationPreference?
   notifications Notification[]
-  deviceTokens  DeviceToken[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -527,20 +523,6 @@ model Feedback {
   @@index([experienceRating])
 }
 
-model DeviceToken {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  token      String   @unique
-  userId     String?  @db.ObjectId
-  ownerId    String?  @db.ObjectId
-  user       User?    @relation(fields: [userId], references: [id])
-  owner      Owner?   @relation(fields: [ownerId], references: [id])
-  deviceInfo String?
-  lastUsed   DateTime @default(now())
-  createdAt  DateTime @default(now())
-  
-  @@index([userId])
-  @@index([ownerId])
-}
 
 model ExchangeRate {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
