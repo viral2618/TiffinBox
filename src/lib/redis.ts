@@ -4,11 +4,11 @@ class RedisClient {
   private static instance: Redis | null = null;
 
   static getInstance(): Redis | null {
-    if (process.env.DISABLE_REDIS === 'true') {
+    if (process.env.DISABLE_REDIS === 'true' || !process.env.REDIS_URL) {
       return null;
     }
     
-    if (!this.instance && process.env.REDIS_URL) {
+    if (!this.instance) {
       this.instance = new Redis(process.env.REDIS_URL, {
         maxRetriesPerRequest: 3,
         lazyConnect: true,
@@ -19,6 +19,7 @@ class RedisClient {
       
       this.instance.on('error', (err) => {
         console.error('Redis connection error:', err.message);
+        this.instance = null;
       });
       
       this.instance.on('connect', () => {
