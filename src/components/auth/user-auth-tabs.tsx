@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFCMToken } from "@/lib/firebase";
 
 // Password Strength Component
 function PasswordStrength({ password }: { password: string }) {
@@ -57,7 +56,6 @@ function PasswordStrength({ password }: { password: string }) {
 export default function UserAuthTabs() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("signin");
-  const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -73,22 +71,6 @@ export default function UserAuthTabs() {
     email: "",
     password: "",
   });
-
-  // Get FCM token on component mount
-  useEffect(() => {
-    const getFCMTokenAsync = async () => {
-      try {
-        const token = await getFCMToken();
-        if (token) {
-          setFcmToken(token);
-        }
-      } catch (error) {
-        console.error('Error getting FCM token:', error);
-      }
-    };
-    
-    getFCMTokenAsync();
-  }, []);
 
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,20 +93,6 @@ export default function UserAuthTabs() {
         }
       }
 
-      const updateFcmToken = async () => {
-        if (fcmToken) {
-          try {
-            await fetch('/api/user/update-fcm-token', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ fcmToken }),
-            });
-          } catch (error) {
-            console.error('Error updating FCM token:', error);
-          }
-        }
-      };
-      
       const result = await signIn("credentials", {
         redirect: false,
         email: signInData.email,
@@ -149,7 +117,6 @@ export default function UserAuthTabs() {
           setError("Invalid email or password");
         }
       } else {
-        await updateFcmToken();
         router.push("/");
         router.refresh();
       }
@@ -169,10 +136,7 @@ export default function UserAuthTabs() {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...signUpData,
-          fcmToken: fcmToken || "",
-        }),
+        body: JSON.stringify(signUpData),
       });
 
       const data = await response.json();

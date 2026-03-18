@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { sendPushNotification } from '@/lib/push-notifications';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/lib/auth";
 import { cache } from '@/lib/cache';
@@ -35,8 +34,8 @@ export async function POST(req: NextRequest) {
       where: { id: session.user.id },
     });
 
-    if (!user || !user.fcmToken) {
-      return NextResponse.json({ error: 'User or FCM token not found' }, { status: 404 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Get dish details with timing for calculating reminder time
@@ -116,15 +115,6 @@ export async function POST(req: NextRequest) {
         isRead: false,
       },
     });
-
-    // Send confirmation push notification
-    await sendPushNotification(
-      user.fcmToken,
-      'Reminder Set!',
-      isRecurring
-        ? `You'll be reminded about ${dish.name} on ${recurringDays.join(', ')}`
-        : `Your reminder for ${dish.name} has been set`
-    );
 
     // Invalidate notification cache to ensure count updates immediately
     cache.invalidatePattern('/api/user/notifications');

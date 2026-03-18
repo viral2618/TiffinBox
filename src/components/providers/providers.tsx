@@ -7,7 +7,6 @@ import { ReduxProvider } from "./redux-provider";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import Navbar from "../user/navbar";
 import { usePathname } from "next/navigation";
-import { FCMInitializer } from "../fcm-init";
 import { Toaster } from "../ui/sonner";
 
 interface ProvidersProps {
@@ -30,7 +29,6 @@ export function Providers({ children }: ProvidersProps) {
             disableTransitionOnChange
           >
             <CurrencyProvider>
-              <FCMInitializer />
               <Toaster richColors position="top-center" />
               {showNavbar && <Navbar />}
               {children}
