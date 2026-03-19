@@ -172,8 +172,8 @@ export const authOptions: AuthOptions = {
         }
       }
 
-      // On subsequent requests, refresh the token with the latest data
-      if (token.sub && token.role === "owner" && trigger !== "update") {
+      // On subsequent requests, refresh the token with the latest data (owner only, not every request)
+      if (token.sub && token.role === "owner" && trigger === "update") {
         const owner = await prisma.owner.findUnique({
           where: { id: token.sub as string },
           select: { isOnboarded: true },

@@ -63,17 +63,18 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
-
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10;
 }
+
+const emptyResponse = (page: number, limit: number): DishesResponse => ({
+  dishes: [],
+  pagination: { total: 0, page, limit, pages: 0 },
+});
 
 export async function getDishes(filters: DishFilters): Promise<DishesResponse> {
   const {
@@ -95,292 +96,151 @@ export async function getDishes(filters: DishFilters): Promise<DishesResponse> {
     sortBy,
   } = filters;
 
-  const hasLocation = lat !== undefined && lng !== undefined && lat !== 0 && lng !== 0;
-  console.log('getDishes called with:', { search, categoryId, subcategoryId, lat, lng, radius, hasLocation });
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  try {
+    const hasLocation = lat !== undefined && lng !== undefined && lat !== 0 && lng !== 0;
 
-  const where: any = {};
-
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-      { shop: { name: { contains: search, mode: "insensitive" } } },
-      { shop: { address: { contains: search, mode: "insensitive" } } },
-      { category: { name: { contains: search, mode: "insensitive" } } },
-      { subcategory: { name: { contains: search, mode: "insensitive" } } },
-      { dishTags: { some: { tag: { name: { contains: search, mode: "insensitive" } } } } }
-    ];
-  }
-
-  if (categoryId) {
-    where.categoryId = categoryId;
-    console.log('Filtering by categoryId:', categoryId);
-  }
-  if (subcategoryId) {
-    where.subcategoryId = subcategoryId;
-    console.log('Filtering by subcategoryId:', subcategoryId);
-  }
-  if (isEggless === true) where.isVeg = true;
-  if (isEggless === false) where.isVeg = false;
-  if (inStock === true) where.isOutOfStock = false;
-  if (hasDiscount === true) where.discountPercentage = { gt: 0 };
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    where.price = {};
-    if (minPrice !== undefined) where.price.gte = minPrice;
-    if (maxPrice !== undefined) where.price.lte = maxPrice;
-  }
-
-  const includeClause = {
-    shop: true,
-    category: true,
-    subcategory: true,
-    timings: true,
-    dishTags: {
-      include: {
-        tag: true
-      }
-    },
-    favorites: userId ? { where: { userId } } : false,
-    Reminder: userId ? { where: { userId, isActive: true } } : false,
-    reviews: {
-      select: {
-        rating: true,
-      },
-    },
-  };
-
-  // Helper function to get current time slot
-  const getCurrentTimeSlot = () => {
-    const now = new Date();
-    const hour = now.getHours();
-    if (hour >= 6 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
-    if (hour >= 18 && hour < 22) return 'evening';
-    return null;
-  };
-
-  // Helper function to filter by serve time
-  const filterByServeTime = (dishes: any[]) => {
-    if (!serveTime || serveTime === 'all') return dishes;
-    
-    return dishes.filter(dish => {
-      if (!dish.timings || dish.timings.length === 0) return false;
-      
-      if (serveTime === 'available-now') {
-        const currentSlot = getCurrentTimeSlot();
-        if (!currentSlot) return false;
-        
-        return dish.timings.some((timing: any) => {
-          const serveFromHour = timing.servedFrom.hour;
-          const serveUntilHour = timing.servedUntil.hour;
-          const currentHour = new Date().getHours();
-          
-          return currentHour >= serveFromHour && currentHour <= serveUntilHour;
-        });
-      }
-      
-      return dish.timings.some((timing: any) => {
-        const serveFromHour = timing.servedFrom.hour;
-        
-        switch (serveTime) {
-          case 'morning':
-            return serveFromHour >= 6 && serveFromHour < 12;
-          case 'afternoon':
-            return serveFromHour >= 12 && serveFromHour < 18;
-          case 'evening':
-            return serveFromHour >= 18 && serveFromHour < 22;
-          default:
-            return true;
-        }
-      });
-    });
-  };
-
-  // Helper function to calculate average rating
-  const calculateAverageRating = (reviews: any[]) => {
-    if (!reviews || reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return sum / reviews.length;
-  };
-
-  // Helper function to sort dishes
-  const sortDishes = (dishes: any[]) => {
-    if (!sortBy || sortBy === 'newest') {
-      return dishes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    let userId: string | undefined;
+    try {
+      const session = await getServerSession(authOptions);
+      userId = session?.user?.id;
+    } catch {
+      userId = undefined;
     }
-    
-    switch (sortBy) {
-      case 'rating':
-        return dishes.sort((a, b) => {
-          const avgA = calculateAverageRating(a.reviews || []);
-          const avgB = calculateAverageRating(b.reviews || []);
-          return avgB - avgA;
-        });
-      case 'reviews':
-        return dishes.sort((a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0));
-      case 'price-low':
-        return dishes.sort((a, b) => a.price - b.price);
-      case 'price-high':
-        return dishes.sort((a, b) => b.price - a.price);
-      default:
-        return dishes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
-  };
 
-  if (hasLocation) {
-    console.log('Searching with location, where clause:', where);
-    const allDishes = await prisma.dish.findMany({
-      where: {},
-      include: includeClause,
-      orderBy: { createdAt: "desc" },
-    });
-    console.log('Found dishes before distance filter:', allDishes.length);
-
-    console.log('Dishes with coordinates:', allDishes.filter(dish => dish.shop.coordinates).length);
-    console.log('Dishes without coordinates:', allDishes.filter(dish => !dish.shop.coordinates).length);
-    
-    let dishesWithDistance = allDishes
-      .filter((dish) => dish.shop.coordinates)
-      .map((dish) => {
-        const distance = calculateDistance(
-          lat!,
-          lng!,
-          dish.shop.coordinates!.lat,
-          dish.shop.coordinates!.lng
-        );
-
-        const isFavorite = userId ? dish.favorites.length > 0 : false;
-        const isReminder = userId ? dish.Reminder.length > 0 : false;
-        const avgRating = calculateAverageRating(dish.reviews || []);
-        const { favorites, shop, Reminder, reviews, ...dishWithoutFavorites } = dish;
-        const { coordinates, ...shopWithoutCoordinates } = shop;
-
-        return {
-          ...dishWithoutFavorites,
-          shop: { ...shopWithoutCoordinates, distance },
-          isFavorite,
-          isReminder,
-          avgRating,
-          reviews: reviews || [],
-        };
-      })
-      .filter((dish) => dish.shop.distance! <= radius);
-
-    // Apply other filters after distance calculation
+    const where: any = {};
     if (search) {
-      dishesWithDistance = dishesWithDistance.filter(dish => 
-        dish.name.toLowerCase().includes(search.toLowerCase()) ||
-        (dish.description && dish.description.toLowerCase().includes(search.toLowerCase()))
-      );
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { shop: { name: { contains: search, mode: "insensitive" } } },
+        { shop: { address: { contains: search, mode: "insensitive" } } },
+        { category: { name: { contains: search, mode: "insensitive" } } },
+        { subcategory: { name: { contains: search, mode: "insensitive" } } },
+        { dishTags: { some: { tag: { name: { contains: search, mode: "insensitive" } } } } },
+      ];
     }
-    
-    if (categoryId) {
-      dishesWithDistance = dishesWithDistance.filter(dish => dish.categoryId === categoryId);
-    }
-    
-    if (subcategoryId) {
-      dishesWithDistance = dishesWithDistance.filter(dish => dish.subcategoryId === subcategoryId);
-    }
-    
-    if (isEggless === true) {
-      dishesWithDistance = dishesWithDistance.filter(dish => dish.isVeg === true);
-    } else if (isEggless === false) {
-      dishesWithDistance = dishesWithDistance.filter(dish => dish.isVeg === false);
-    }
-
-    console.log('Dishes after distance filter (within', radius, 'km):', dishesWithDistance.length);
-    if (dishesWithDistance.length > 0) {
-      console.log('Sample distances:', dishesWithDistance.slice(0, 3).map(d => ({ name: d.name, distance: d.shop.distance })));
+    if (categoryId) where.categoryId = categoryId;
+    if (subcategoryId) where.subcategoryId = subcategoryId;
+    if (isEggless === true) where.isVeg = true;
+    if (isEggless === false) where.isVeg = false;
+    if (inStock === true) where.isOutOfStock = false;
+    if (hasDiscount === true) where.discountPercentage = { gt: 0 };
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
 
-    // Apply rating filter
-    if (minRating && minRating > 0) {
-      dishesWithDistance = dishesWithDistance.filter(dish => dish.avgRating >= minRating);
+    const includeClause = {
+      shop: true,
+      category: true,
+      subcategory: true,
+      timings: true,
+      dishTags: { include: { tag: true } },
+      favorites: userId ? { where: { userId } } : false,
+      Reminder: userId ? { where: { userId, isActive: true } } : false,
+      reviews: { select: { rating: true } },
+    };
+
+    const calculateAverageRating = (reviews: any[]) => {
+      if (!reviews?.length) return 0;
+      return reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+    };
+
+    const filterByServeTime = (dishes: any[]) => {
+      if (!serveTime || serveTime === "all") return dishes;
+      return dishes.filter((dish) => {
+        if (!dish.timings?.length) return false;
+        if (serveTime === "available-now") {
+          const currentHour = new Date().getHours();
+          return dish.timings.some((t: any) => currentHour >= t.servedFrom.hour && currentHour <= t.servedUntil.hour);
+        }
+        return dish.timings.some((t: any) => {
+          const h = t.servedFrom.hour;
+          if (serveTime === "morning") return h >= 6 && h < 12;
+          if (serveTime === "afternoon") return h >= 12 && h < 18;
+          if (serveTime === "evening") return h >= 18 && h < 22;
+          return true;
+        });
+      });
+    };
+
+    const sortDishes = (dishes: any[]) => {
+      switch (sortBy) {
+        case "rating": return dishes.sort((a, b) => calculateAverageRating(b.reviews) - calculateAverageRating(a.reviews));
+        case "reviews": return dishes.sort((a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0));
+        case "price-low": return dishes.sort((a, b) => a.price - b.price);
+        case "price-high": return dishes.sort((a, b) => b.price - a.price);
+        default: return dishes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+    };
+
+    if (hasLocation) {
+      const allDishes = await prisma.dish.findMany({
+        where: {},
+        include: includeClause,
+        orderBy: { createdAt: "desc" },
+      });
+
+      let dishesWithDistance = allDishes
+        .filter((dish) => dish.shop.coordinates)
+        .map((dish) => {
+          const distance = calculateDistance(lat!, lng!, dish.shop.coordinates!.lat, dish.shop.coordinates!.lng);
+          const isFavorite = userId ? dish.favorites.length > 0 : false;
+          const isReminder = userId ? dish.Reminder.length > 0 : false;
+          const avgRating = calculateAverageRating(dish.reviews || []);
+          const { favorites, shop, Reminder, reviews, ...rest } = dish;
+          const { coordinates, ...shopRest } = shop;
+          return { ...rest, shop: { ...shopRest, distance }, isFavorite, isReminder, avgRating, reviews: reviews || [] };
+        })
+        .filter((dish) => dish.shop.distance! <= radius);
+
+      if (search) dishesWithDistance = dishesWithDistance.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()) || (d.description && d.description.toLowerCase().includes(search.toLowerCase())));
+      if (categoryId) dishesWithDistance = dishesWithDistance.filter((d) => d.categoryId === categoryId);
+      if (subcategoryId) dishesWithDistance = dishesWithDistance.filter((d) => d.subcategoryId === subcategoryId);
+      if (isEggless === true) dishesWithDistance = dishesWithDistance.filter((d) => d.isVeg === true);
+      if (isEggless === false) dishesWithDistance = dishesWithDistance.filter((d) => d.isVeg === false);
+      if (minRating && minRating > 0) dishesWithDistance = dishesWithDistance.filter((d) => d.avgRating >= minRating);
+      dishesWithDistance = filterByServeTime(dishesWithDistance);
+      dishesWithDistance = sortDishes(dishesWithDistance);
+
+      const total = dishesWithDistance.length;
+      const offset = (page - 1) * limit;
+      return { dishes: dishesWithDistance.slice(offset, offset + limit), pagination: { total, page, limit, pages: Math.ceil(total / limit) } };
     }
 
-    // Apply serve time filter
-    dishesWithDistance = filterByServeTime(dishesWithDistance);
+    const allDishes = await prisma.dish.findMany({ where, include: includeClause, orderBy: { createdAt: "desc" } });
 
-    // Apply sorting
-    dishesWithDistance = sortDishes(dishesWithDistance);
+    let filteredDishes = allDishes.map((dish) => {
+      const isFavorite = userId ? dish.favorites.length > 0 : false;
+      const isReminder = userId ? dish.Reminder.length > 0 : false;
+      const avgRating = calculateAverageRating(dish.reviews || []);
+      const { favorites, Reminder, reviews, shop, ...rest } = dish;
+      return { ...rest, shop, isFavorite, isReminder, avgRating, reviews: reviews || [] };
+    });
 
-    const total = dishesWithDistance.length;
-    const pages = Math.ceil(total / limit);
+    if (minRating && minRating > 0) filteredDishes = filteredDishes.filter((d) => d.avgRating >= minRating);
+    filteredDishes = filterByServeTime(filteredDishes);
+    filteredDishes = sortDishes(filteredDishes);
+
+    const total = filteredDishes.length;
     const offset = (page - 1) * limit;
-    const paginatedDishes = dishesWithDistance.slice(offset, offset + limit);
+    return { dishes: filteredDishes.slice(offset, offset + limit), pagination: { total, page, limit, pages: Math.ceil(total / limit) } };
 
-    return {
-      dishes: paginatedDishes,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages,
-      },
-    };
+  } catch (error) {
+    console.error("getDishes error:", error);
+    return emptyResponse(page, limit);
   }
-
-  // No location provided - regular search
-  console.log('Where clause:', where);
-  const allDishes = await prisma.dish.findMany({
-    where,
-    include: includeClause,
-    orderBy: { createdAt: "desc" },
-  });
-
-  const dishesWithMetadata = allDishes.map((dish) => {
-    const isFavorite = userId ? dish.favorites.length > 0 : false;
-    const isReminder = userId ? dish.Reminder.length > 0 : false;
-    const avgRating = calculateAverageRating(dish.reviews || []);
-    const { favorites, Reminder, reviews, shop, ...dishWithoutFavorites } = dish;
-
-    return {
-      ...dishWithoutFavorites,
-      shop,
-      isFavorite,
-      isReminder,
-      avgRating,
-      reviews: reviews || [],
-    };
-  });
-
-  let filteredDishes = dishesWithMetadata;
-
-  // Apply rating filter
-  if (minRating && minRating > 0) {
-    filteredDishes = filteredDishes.filter(dish => dish.avgRating >= minRating);
-  }
-
-  // Apply serve time filter
-  filteredDishes = filterByServeTime(filteredDishes);
-
-  // Apply sorting
-  filteredDishes = sortDishes(filteredDishes);
-
-  // Use filtered count for pagination
-  const total = filteredDishes.length;
-  const pages = Math.ceil(total / limit);
-  const offset = (page - 1) * limit;
-  
-  // Apply pagination to filtered results
-  const paginatedFilteredDishes = filteredDishes.slice(offset, offset + limit);
-
-  return {
-    dishes: paginatedFilteredDishes,
-    pagination: {
-      total,
-      page,
-      limit,
-      pages,
-    },
-  };
 }
 
 export async function getCategories() {
-  return await prisma.category.findMany({
-    include: { subcategories: true },
-    orderBy: { name: 'asc' },
-  });
+  try {
+    return await prisma.category.findMany({
+      include: { subcategories: true },
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    console.error("getCategories error:", error);
+    return [];
+  }
 }
