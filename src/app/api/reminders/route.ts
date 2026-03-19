@@ -1,11 +1,11 @@
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/lib/auth";
 import { cache } from '@/lib/cache';
 import { RedisScheduler } from '@/lib/notifications/redis-scheduler';
 
-const prisma = new PrismaClient();
+
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);

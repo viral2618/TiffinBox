@@ -1,10 +1,10 @@
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { withCache } from "@/lib/cache";
 
-const prisma = new PrismaClient();
+
 
 async function getAboutHandler() {
   try {
