@@ -96,7 +96,7 @@ interface ShopDetailState {
     categoryId: string | null;
     subcategoryId: string | null;
     tagId: string | null;
-    isVeg: boolean;
+    isVeg: boolean | null;
     isOutOfStock: boolean;
     isMarketingEnabled: boolean;
   };
@@ -121,7 +121,7 @@ const initialState: ShopDetailState = {
     categoryId: null,
     subcategoryId: null,
     tagId: null,
-    isVeg: false,
+    isVeg: null,
     isOutOfStock: false,
     isMarketingEnabled: false
   }

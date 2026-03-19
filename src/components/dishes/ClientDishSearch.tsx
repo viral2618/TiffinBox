@@ -187,7 +187,7 @@ export default function ClientDishSearch() {
             </p>
           ) : (
             <p className="text-sm" style={{ color: '#92400e' }}>
-              Try searching for dishes, bakeries
+              Try searching for dishes or locations (e.g., "Goa", "Mumbai")
             </p>
           )}
         </div>

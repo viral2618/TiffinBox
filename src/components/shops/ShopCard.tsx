@@ -69,7 +69,7 @@ export default function ShopCard({ shop }: ShopCardProps) {
     <motion.div 
       whileHover={{ y: -6 }} 
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group rounded-2xl overflow-hidden"
+      className="h-full flex flex-col group rounded-2xl overflow-hidden"
       style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}
     >
       {/* Image Carousel */}
@@ -181,7 +181,7 @@ export default function ShopCard({ shop }: ShopCardProps) {
       </div>
 
       {/* Content */}
-      <div className="px-4 pt-3 pb-4">
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
         <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors text-center">
           {shop.name}
         </h3>
@@ -214,7 +214,7 @@ export default function ShopCard({ shop }: ShopCardProps) {
         )}
         
         {/* View Details Button */}
-        <div className="mt-4 flex justify-center">
+        <div className="mt-auto pt-3 flex justify-center">
           <Link href={`/shops/${shop.slug}`}>
             <Button 
               variant="outline" 

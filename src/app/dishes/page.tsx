@@ -85,12 +85,12 @@ export default async function DishesPage({ searchParams }: DishesPageProps) {
   const pageSubtitle = getPageSubtitle(params);
 
   return (
-    <div className="dishes-section">
-      <div className="container mx-auto py-24 px-3 sm:px-4">
-        <div className="flex flex-col space-y-8">
-          <div className="text-center max-w-3xl mx-auto mb-4">
-            <h1 className="section-header text-4xl font-semibold mb-3">{pageTitle}</h1>
-            <p className="text-lg" style={{ color: '#0f766e' }}>{pageSubtitle}</p>
+    <div className="dishes-section pb-24 md:pb-0">
+      <div className="container mx-auto py-20 sm:py-24 px-3 sm:px-4">
+        <div className="flex flex-col space-y-6">
+          <div className="text-center max-w-3xl mx-auto mb-2">
+            <h1 className="section-header text-2xl sm:text-4xl font-semibold mb-2">{pageTitle}</h1>
+            <p className="text-sm sm:text-lg" style={{ color: '#0f766e' }}>{pageSubtitle}</p>
           </div>
         
         <div className="max-w-3xl mx-auto w-full">

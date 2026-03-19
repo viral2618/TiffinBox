@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import CategoryCard from '@/components/cards/category-card';
 import type { Category } from '@/lib/categories';
 import { useDebounce } from '@/hooks/use-debounce';
+import CategoriesLoading from './CategoriesLoading';
 
 interface CategoriesClientProps {
   categories: Category[];
@@ -21,11 +22,7 @@ interface CategoriesClientProps {
   searchParams: { search?: string; page?: string };
 }
 
-export default function CategoriesClient({ 
-  categories, 
-  pagination, 
-  searchParams 
-}: CategoriesClientProps) {
+function CategoriesContent({ categories, pagination, searchParams }: CategoriesClientProps) {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.search || '');
@@ -189,5 +186,14 @@ export default function CategoriesClient({
         </>
       )}
     </>
+  );
+}
+
+
+export default function CategoriesClient(props: CategoriesClientProps) {
+  return (
+    <Suspense fallback={<CategoriesLoading />}>
+      <CategoriesContent {...props} />
+    </Suspense>
   );
 }

@@ -27,7 +27,7 @@ export default function CategoryCard({
     <>
       <motion.div
         variants={variants}
-        className="flex flex-col category-card"
+        className="h-full flex flex-col category-card"
         style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', borderRadius: '1rem', padding: '12px', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}
       >
         <div

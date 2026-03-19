@@ -34,13 +34,15 @@ const SearchDropdown = forwardRef<HTMLDivElement, SearchDropdownProps>(
           exit={{ opacity: 0, y: -10, scale: 0.95 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
           className={cn(
-            "absolute top-full left-0 right-0 mt-2 rounded-xl z-50 max-h-96 overflow-hidden",
+            "absolute top-full left-0 right-0 mt-2 rounded-xl max-h-96 overflow-hidden",
             className
           )}
           style={{
             backgroundColor: '#ffffff',
-            border: '1.5px solid var(--brand-border)',
-            boxShadow: '0 8px 32px rgba(13,148,136,0.12), 0 2px 8px rgba(0,0,0,0.06)'
+            border: '1.5px solid #e5e7eb',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)',
+            zIndex: 9999,
+            position: 'absolute',
           }}
         >
           {isLoading && (
@@ -98,7 +100,7 @@ const SearchDropdown = forwardRef<HTMLDivElement, SearchDropdownProps>(
 
               {/* Search Stats */}
               {results!.totalHits > 0 && (
-                <div className="px-4 py-2" style={{ borderTop: '1px solid var(--brand-border)', backgroundColor: 'var(--brand-cream)' }}>
+                <div className="px-4 py-2" style={{ borderTop: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
                   <div className="flex items-center justify-between text-xs" style={{ color: 'var(--brand-subtext)' }}>
                     <span>{results!.totalHits} results found</span>
                     <div className="flex items-center space-x-1">
@@ -127,12 +129,12 @@ interface SearchSectionProps {
 
 function SearchSection({ title, icon, results, onResultClick }: SearchSectionProps) {
   return (
-    <div style={{ borderBottom: '1px solid var(--brand-border)' }} className="last:border-b-0">
-      <div className="px-4 py-2" style={{ backgroundColor: 'var(--brand-cream)', borderBottom: '1px solid var(--brand-border)' }}>
-        <div className="flex items-center space-x-2 text-sm font-medium" style={{ color: 'var(--brand-text)' }}>
+    <div style={{ borderBottom: '1px solid #f3f4f6' }} className="last:border-b-0">
+      <div className="px-4 py-2" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #f3f4f6' }}>
+        <div className="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>
           {icon}
           <span>{title}</span>
-          <span className="text-xs" style={{ color: 'var(--brand-subtext)' }}>({results.length})</span>
+          <span className="text-xs font-normal" style={{ color: '#9ca3af' }}>({results.length})</span>
         </div>
       </div>
       
@@ -159,14 +161,14 @@ interface SearchResultItemProps {
 function SearchResultItem({ result, onClick, isLast }: SearchResultItemProps) {
   return (
     <motion.button
-      whileHover={{ backgroundColor: 'var(--brand-warm)' }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ backgroundColor: '#f9fafb' }}
+      whileTap={{ scale: 0.99 }}
       onClick={onClick}
       className={cn(
-        "w-full px-4 py-3 text-left transition-colors duration-150 focus:outline-none",
+        "w-full px-4 py-3 text-left transition-colors duration-100 focus:outline-none",
         !isLast && "border-b"
       )}
-      style={{ borderColor: 'var(--brand-border)' }}
+      style={{ borderColor: '#f3f4f6' }}
     >
       <div className="flex items-start space-x-3">
         {result.image && (
@@ -183,11 +185,11 @@ function SearchResultItem({ result, onClick, isLast }: SearchResultItemProps) {
           <div className="flex items-center justify-between">
             <h4 
               className="text-sm font-medium truncate"
-              style={{ color: 'var(--brand-text)' }}
+              style={{ color: '#111827' }}
               dangerouslySetInnerHTML={{ __html: result.title }}
             />
             {result.price && (
-              <span className="text-sm font-semibold ml-2" style={{ color: 'var(--brand-primary)' }}>
+              <span className="text-sm font-bold ml-2" style={{ color: 'var(--brand-primary)' }}>
                 ₹{result.price}
               </span>
             )}
@@ -195,29 +197,29 @@ function SearchResultItem({ result, onClick, isLast }: SearchResultItemProps) {
           
           {result.description && (
             <p 
-              className="text-xs mt-1 line-clamp-2"
-              style={{ color: 'var(--brand-subtext)' }}
+              className="text-xs mt-0.5 line-clamp-1"
+              style={{ color: '#6b7280' }}
               dangerouslySetInnerHTML={{ __html: result.description }}
             />
           )}
           
-          <div className="flex items-center space-x-2 mt-1">
+          <div className="flex items-center space-x-2 mt-1.5">
             {result.categoryName && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: 'var(--brand-warm)', color: 'var(--brand-primary)' }}>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ backgroundColor: '#f0fdfa', color: 'var(--brand-primary)' }}>
                 <Tag className="h-3 w-3 mr-1" />
                 {result.categoryName}
               </span>
             )}
             
             {result.shopName && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: 'var(--brand-warm)', color: 'var(--brand-subtext)' }}>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ backgroundColor: '#f3f4f6', color: '#6b7280' }}>
                 <Store className="h-3 w-3 mr-1" />
                 {result.shopName}
               </span>
             )}
             
             {result.isAvailable === false && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-600">
                 Unavailable
               </span>
             )}

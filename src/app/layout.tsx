@@ -13,8 +13,10 @@ import BetaBanner from "@/components/BetaBanner";
 
 import ScrollToTop from "@/components/scroll-to-top";
 
-// Initialize real-time services
-if (typeof window === 'undefined') {
+// Initialize real-time services once on server startup
+let realtimeInitialized = false;
+if (typeof window === 'undefined' && !realtimeInitialized) {
+  realtimeInitialized = true;
   initializeRealtimeServices();
 }
 

@@ -61,10 +61,11 @@ export default function DishCard({ dish }: DishCardProps) {
   const router = useRouter()
 
   useEffect(() => {
-    // Fetch preparation slot status
+    const controller = new AbortController();
+
     const fetchPreparationStatus = async () => {
       try {
-        const response = await fetch(`/api/owner/dishes/${dish.id}/preparation-slot`);
+        const response = await fetch(`/api/owner/dishes/${dish.id}/preparation-slot`, { signal: controller.signal });
         if (response.ok) {
           const data = await response.json();
           if (data.slot) {
@@ -84,14 +85,18 @@ export default function DishCard({ dish }: DishCardProps) {
           }
         }
       } catch (error) {
-        console.error('Error fetching preparation status:', error);
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error fetching preparation status:', error);
+        }
       }
     };
 
     fetchPreparationStatus();
-    // Poll every 30 seconds
     const interval = setInterval(fetchPreparationStatus, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [dish.id]);
   
   const handleToggleFavorite = async (e: React.MouseEvent) => {
@@ -132,7 +137,7 @@ export default function DishCard({ dish }: DishCardProps) {
   const convertedOriginalPrice = dish.originalPrice ? convertPrice(dish.originalPrice, dishCurrency) : null
 
   return (
-    <div onClick={handleCardClick} className="rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer card-hover" style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}>
+    <div onClick={handleCardClick} className="h-full flex flex-col rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer card-hover" style={{ backgroundColor: '#ffffff', border: '1.5px solid #99f6e4', boxShadow: '0 2px 12px rgba(13,148,136,0.07)' }}>
       {/* Dish Image */}
       <div className="aspect-square relative overflow-hidden">
         {dish.imageUrls && dish.imageUrls.length > 0 ? (
@@ -218,7 +223,7 @@ export default function DishCard({ dish }: DishCardProps) {
       </div>
 
       {/* Dish Info */}
-      <div className="block p-4 transition-colors">
+      <div className="flex flex-col flex-1 p-4">
         <div className="text-center mb-3">
           <h3 className="font-semibold mb-1 text-lg" style={{ color: '#134e4a' }}>
             {dish.name}
@@ -252,7 +257,7 @@ export default function DishCard({ dish }: DishCardProps) {
         </div>
         
         {/* Price */}
-        <div className="text-center">
+        <div className="text-center mt-auto pt-2">
           {convertedOriginalPrice && dish.discountPercentage ? (
             <div className="flex items-center justify-center space-x-2">
               <p className="text-sm line-through" style={{ color: '#0f766e' }}>

@@ -11,9 +11,11 @@ export default function DishImageStatus({ dishId }: DishImageStatusProps) {
   const [statusColor, setStatusColor] = useState<string>("text-green-600");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchStatus = async () => {
       try {
-        const response = await fetch(`/api/owner/dishes/${dishId}/preparation-slot`);
+        const response = await fetch(`/api/owner/dishes/${dishId}/preparation-slot`, { signal: controller.signal });
         if (response.ok) {
           const data = await response.json();
           if (data.slot) {
@@ -37,13 +39,18 @@ export default function DishImageStatus({ dishId }: DishImageStatusProps) {
           }
         }
       } catch (error) {
-        console.error('Error fetching status:', error);
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error fetching status:', error);
+        }
       }
     };
 
     fetchStatus();
     const interval = setInterval(fetchStatus, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [dishId]);
 
   return (

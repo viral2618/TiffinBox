@@ -132,7 +132,7 @@ export default function CategoriesSection() {
 
   if (loading) {
     return (
-      <section className="py-24">
+      <section className="py-8 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4 lg:px-8">
           {/* Section Header with View More Button */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -156,7 +156,7 @@ export default function CategoriesSection() {
   }
 
   return (
-    <section className="py-24">
+    <section className="py-8 sm:py-12 lg:py-16">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header with View More Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -177,11 +177,11 @@ export default function CategoriesSection() {
             containScroll: "trimSnaps",
           }}
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-4 items-stretch">
             {categories.map((category) => (
               <CarouselItem 
                 key={category.id} 
-                className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+                className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 h-auto"
               >
                 <CategoryCard
                   category={category}

@@ -1,10 +1,26 @@
-.search-input::placeholder {
-  color: var(--brand-subtext);
-  opacity: 0.6;
-  font-weight: 400;
+/* neutralise globals.css overrides for the search input */
+.search-bar-input {
+  background-color: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #111827 !important;
 }
 
-.search-input:focus::placeholder {
-  color: var(--brand-subtext);
-  opacity: 0.4;
+.search-bar-input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.search-bar-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* kill browser autofill background */
+.search-bar-input:-webkit-autofill,
+.search-bar-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
 }

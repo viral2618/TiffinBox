@@ -31,9 +31,9 @@ export default function BottomNavbar() {
     : navLinks
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden w-[95%] max-w-md">
+    <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 md:hidden w-[92%] max-w-sm">
       <div
-        className="flex justify-around h-16 items-center px-2"
+        className="flex justify-around h-14 items-center px-1"
         style={{
           background: 'rgba(240,253,250,0.97)',
           backdropFilter: 'blur(20px)',
@@ -46,27 +46,25 @@ export default function BottomNavbar() {
           {displayLinks.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href
             return (
-              <Link key={label} href={href} className="relative flex flex-col items-center justify-center space-y-1 w-16 h-16">
-                <Icon 
-                  className={cn(
-                    "w-6 h-6 transition-all", 
-                    isActive ? "text-primary" : "text-foreground/70"
-                  )} 
-                  fill={isActive ? "currentColor" : "none"} 
-                  style={{ color: isActive ? '#0d9488' : '#0f766e' }}
+              <Link key={label} href={href} className="relative flex flex-col items-center justify-center space-y-0.5 w-14 h-14">
+                {/* Active pill background */}
+                {isActive && (
+                  <div
+                    className="absolute top-1.5 rounded-full"
+                    style={{ width: '36px', height: '28px', background: 'rgba(13,148,136,0.12)' }}
+                  />
+                )}
+                <Icon
+                  className="w-5 h-5 transition-all relative z-10"
+                  strokeWidth={isActive ? 2.5 : 1.8}
+                  style={{ color: isActive ? '#0d9488' : '#6b7280' }}
                 />
-                <span 
-                  className={cn(
-                    "text-xs transition-all", 
-                    isActive ? "font-semibold" : ""
-                  )}
-                  style={{ color: isActive ? '#0d9488' : '#0f766e' }}
+                <span
+                  className="text-[10px] transition-all relative z-10"
+                  style={{ color: isActive ? '#0d9488' : '#6b7280', fontWeight: isActive ? 600 : 400 }}
                 >
                   {label}
                 </span>
-                {isActive && (
-                  <div className="absolute -bottom-1 w-6 h-1 rounded-full" style={{ background: 'linear-gradient(90deg,#0d9488,#f59e0b)' }} />
-                )}
               </Link>
             )
           })}

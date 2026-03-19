@@ -502,6 +502,24 @@ footer a:hover {
   box-shadow: 0 16px 48px rgba(13, 148, 136, 0.12) !important;
 }
 
+/* ─── Responsive section spacing ───────────────────────── */
+.homepage-section main,
+.homepage-section > div > main {
+  gap: 1.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .homepage-section main {
+    gap: 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .homepage-section main {
+    gap: 2.5rem !important;
+  }
+}
+
 /* ─── Responsive ────────────────────────────────────────── */
 @media (max-width: 640px) {
   .container {

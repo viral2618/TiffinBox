@@ -274,7 +274,7 @@ export default function FeaturedShopsSection() {
 
   if (loading) {
     return (
-      <section className="py-4 bg-background relative z-10">
+      <section className="py-6 sm:py-8 bg-background relative z-10">
         <div className="container mx-auto px-4 lg:px-8">
           {/* Section Header with View More Button */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -299,7 +299,7 @@ export default function FeaturedShopsSection() {
   }
 
   return (
-    <section ref={ref} className="py-4bg-background relative z-10">
+    <section ref={ref} className="py-6 sm:py-8 bg-background relative z-10">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header with View More Button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -322,12 +322,12 @@ export default function FeaturedShopsSection() {
             containScroll: "trimSnaps",
           }}
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-4 items-stretch">
             {shops.map((shop) => {
               return (
                 <CarouselItem 
                   key={shop.id} 
-                  className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 h-auto"
                 >
                   <ShopCard shop={shop} />
                 </CarouselItem>

@@ -16,12 +16,12 @@ function HomeContent() {
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.8])
 
   return (
-    <div className="homepage-section">
+    <div className="homepage-section pb-24 md:pb-0">
 
       <motion.div style={{ opacity }}>
         <Hero />
       </motion.div>
-      <main className="relative space-y-8">
+      <main className="relative space-y-4 sm:space-y-6 lg:space-y-8">
         <CategoriesSection />
         <FreshDishesSection />
         <FeaturedShopsSection />
